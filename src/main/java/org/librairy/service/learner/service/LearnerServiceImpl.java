@@ -1,0 +1,91 @@
+package org.librairy.service.learner.service;
+
+import org.apache.avro.AvroRemoteException;
+import org.librairy.service.learner.facade.model.Corpus;
+import org.librairy.service.learner.facade.model.Document;
+import org.librairy.service.learner.facade.model.LearnerService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.util.Map;
+
+@Component
+public class LearnerServiceImpl implements LearnerService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(LearnerServiceImpl.class);
+
+    @Value("#{environment['RESOURCE_FOLDER']?:'${resource.folder}'}")
+    String resourceFolder;
+
+    String model              ;
+
+    @Autowired
+    CorpusService corpusService;
+
+    @Autowired
+    TopicsService topicsService;
+
+    @Autowired
+    InferencePoolManager inferencePoolManager;
+
+    @Autowired
+    TrainingPoolManager trainingPoolManager;
+
+    @PostConstruct
+    public void setup() throws IOException {
+
+        //// Load resources
+        //model              = Paths.get(resourceFolder,"resource.bin").toFile().getAbsolutePath();
+
+        LOG.info("Service initialized");
+    }
+
+
+    @Override
+    public String addDocument(Document document) throws AvroRemoteException {
+        try {
+            corpusService.add(document);
+        } catch (IOException e) {
+            throw new AvroRemoteException("IO Error",e);
+        }
+        return "document added";
+    }
+
+    @Override
+    public String reset() throws AvroRemoteException {
+        try {
+            corpusService.remove();
+            topicsService.remove();
+        } catch (IOException e) {
+            throw new AvroRemoteException("IO Error",e);
+        }
+        return "documents deleted";
+    }
+
+    @Override
+    public String train(Map<String, String> map) throws AvroRemoteException {
+        if (corpusService.getNumDocs() <= 0 ){
+            LOG.info("Corpus is empty.");
+            return "Corpus is empty";
+        }
+        LOG.info("Training a new model from parameters: " + map + " with a corpus of " + corpusService.getNumDocs() + " docs");
+        try {
+            corpusService.close();
+        } catch (IOException e) {
+            throw new AvroRemoteException("IO Error",e);
+        }
+        if (trainingPoolManager.train(map))
+            return "building a new model";
+        else return "error setting corpus";
+    }
+
+    @Override
+    public Corpus getCorpus() throws AvroRemoteException {
+        return Corpus.newBuilder().setSize(Long.valueOf(corpusService.getNumDocs()).intValue()).setUpdated(corpusService.getUpdated()).build();
+    }
+}

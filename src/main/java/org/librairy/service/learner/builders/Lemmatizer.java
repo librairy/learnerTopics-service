@@ -1,0 +1,126 @@
+package org.librairy.service.learner.builders;
+
+import cc.mallet.pipe.CharSequence2TokenSequence;
+import cc.mallet.pipe.Input2CharSequence;
+import cc.mallet.pipe.Pipe;
+import cc.mallet.pipe.SerialPipes;
+import cc.mallet.types.Instance;
+import cc.mallet.types.SingleInstanceIterator;
+import cc.mallet.types.TokenSequence;
+import cc.mallet.util.CharSequenceLexer;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.google.common.base.Strings;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.ObjectMapper;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
+import org.librairy.service.nlp.facade.model.Form;
+import org.librairy.service.nlp.facade.model.PoS;
+import org.librairy.service.nlp.facade.rest.model.ProcessRequest;
+import org.librairy.service.nlp.facade.rest.model.ProcessResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
+
+import java.io.*;
+import java.util.Arrays;
+import java.util.List;
+
+/**
+ * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
+ */
+public class Lemmatizer extends Pipe implements Serializable {
+
+    private static final Logger LOG = LoggerFactory.getLogger(Lemmatizer.class);
+    private final List<PoS> pos;
+    private final String annotatorEndpoint;
+
+    static{
+        Unirest.setDefaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
+        Unirest.setDefaultHeader("Content-Type", MediaType.APPLICATION_JSON_VALUE);
+
+        com.fasterxml.jackson.databind.ObjectMapper jacksonObjectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
+//        jacksonObjectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        jacksonObjectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+        Unirest.setObjectMapper(new ObjectMapper() {
+
+            public <T> T readValue(String value, Class<T> valueType) {
+                try {
+                    return jacksonObjectMapper.readValue(value, valueType);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            public String writeValue(Object value) {
+                try {
+                    return jacksonObjectMapper.writeValueAsString(value);
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
+
+    public Lemmatizer(String endpoint, List<PoS> pos){
+
+        this.pos        = pos;
+        this.annotatorEndpoint = endpoint;
+
+    }
+
+    public Instance pipe (Instance carrier)
+    {
+        String text = (String) carrier.getData();
+
+        if (Strings.isNullOrEmpty(text)) return carrier;
+
+        String description = text.length() > 25? new String(text.substring(0,25)) : text;
+
+        LOG.info("retrieving lemmas from annotator" + description + " ..");
+
+        CharSequence rawData = (CharSequence) carrier.getData();
+        try {
+
+            ProcessRequest req = new ProcessRequest(rawData.toString(), this.pos, Form.LEMMA);
+            HttpResponse<ProcessResult> processResult = Unirest.post(annotatorEndpoint + "/process")
+                    .body(req)
+                    .asObject(ProcessResult.class);
+
+            if (processResult.getStatus() == 200){
+                String tokens = processResult.getBody().getProcessedText();
+                carrier.setData(tokens);
+            }else{
+                LOG.warn("Error from annotator: " + processResult.getStatus() + " : " + processResult.getStatusText());
+            }
+
+
+        } catch (UnirestException e) {
+            LOG.warn("Lemmatizer service is down!",e);
+        }
+
+
+
+        return carrier;
+    }
+
+    // Serialization
+
+    private static final long serialVersionUID = 1;
+    private static final int CURRENT_SERIAL_VERSION = 0;
+
+    private void writeObject (ObjectOutputStream out) throws IOException {
+        out.writeInt(CURRENT_SERIAL_VERSION);
+        //out.writeObject(lexer);
+    }
+
+    private void readObject (ObjectInputStream in) throws IOException, ClassNotFoundException {
+        int version = in.readInt ();
+        //lexer = (CharSequenceLexer) in.readObject();
+    }
+
+
+}
