@@ -80,7 +80,7 @@ public class Lemmatizer extends Pipe implements Serializable {
 
         String description = text.length() > 25? new String(text.substring(0,25)) : text;
 
-        LOG.info("retrieving lemmas from annotator" + description + " ..");
+        LOG.info("retrieving lemmas for text: '" + description + "' ..");
 
         CharSequence rawData = (CharSequence) carrier.getData();
         try {

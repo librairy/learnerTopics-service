@@ -1,5 +1,6 @@
 FROM anapsix/alpine-java:8u162b12_server-jre
 VOLUME /tmp
+VOLUME /librairy
 ADD learner-topics-service.jar /app.jar
-ADD bin /bin
+ADD bin /librairy/model
 ENTRYPOINT exec java $JAVA_OPTS -server -jar /app.jar

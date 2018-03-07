@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -127,6 +128,10 @@ public class LDALauncher {
 
 
         LOG.info("saving model to disk .. ");
+        File modelFolder = Paths.get(parameters.getOutputDir()).toFile();
+
+        if (!modelFolder.exists()) modelFolder.mkdirs();
+
         model.write(Paths.get(parameters.getOutputDir(), "model-parallel.bin").toFile());
 
 
