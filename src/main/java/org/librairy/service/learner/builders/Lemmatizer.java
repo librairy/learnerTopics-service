@@ -83,23 +83,32 @@ public class Lemmatizer extends Pipe implements Serializable {
         LOG.info("retrieving lemmas for text: '" + description + "' ..");
 
         CharSequence rawData = (CharSequence) carrier.getData();
-        try {
 
-            ProcessRequest req = new ProcessRequest(rawData.toString(), this.pos, Form.LEMMA);
-            HttpResponse<ProcessResult> processResult = Unirest.post(annotatorEndpoint + "/process")
-                    .body(req)
-                    .asObject(ProcessResult.class);
+        int maxRetries = 3;
 
-            if (processResult.getStatus() == 200){
-                String tokens = processResult.getBody().getProcessedText();
-                carrier.setData(tokens);
-            }else{
-                LOG.warn("Error from annotator: " + processResult.getStatus() + " : " + processResult.getStatusText());
+        while(maxRetries-- > 0){
+            try {
+
+                ProcessRequest req = new ProcessRequest(rawData.toString(), this.pos, Form.LEMMA);
+                HttpResponse<ProcessResult> processResult = Unirest.post(annotatorEndpoint + "/process")
+                        .body(req)
+                        .asObject(ProcessResult.class);
+
+                if (processResult.getStatus() == 200){
+                    String tokens = processResult.getBody().getProcessedText();
+                    carrier.setData(tokens);
+                }else{
+                    LOG.warn("Error from annotator: " + processResult.getStatus() + " : " + processResult.getStatusText());
+                }
+                break;
+            } catch (UnirestException e) {
+                LOG.warn("Lemmatizer service is down!",e);
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
             }
-
-
-        } catch (UnirestException e) {
-            LOG.warn("Lemmatizer service is down!",e);
         }
 
 

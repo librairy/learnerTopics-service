@@ -89,9 +89,10 @@ public class CSVReader {
         while(iterator.hasNext()){
 
             int index = counter.incrementAndGet();
+            final Instance rawInstance = iterator.next();
             executors.submit(() -> {
                 LOG.info("processing document: " + index);
-                instances.addThruPipe(iterator.next());
+                instances.addThruPipe(rawInstance);
             });
 
         }
