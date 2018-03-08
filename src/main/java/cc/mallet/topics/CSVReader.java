@@ -5,6 +5,7 @@ import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import org.librairy.service.learner.builders.PipeBuilder;
+import org.librairy.service.learner.executors.ParallelExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -61,6 +62,8 @@ public class CSVReader {
         // Now process each instance provided by the iterator.
         instances.addThruPipe(iterator);
 
+        reader.close();
+
         return instances;
     }
 
@@ -80,25 +83,24 @@ public class CSVReader {
 
         CsvIterator iterator = new CsvIterator(reader, regEx, dataGroup, targetGroup, uriGroup);
 
-        ExecutorService executors = Executors.newWorkStealingPool();
+        ParallelExecutor executors = new ParallelExecutor();
+
         AtomicInteger counter = new AtomicInteger();
         while(iterator.hasNext()){
 
-            Instance instance = iterator.next();
-            counter.incrementAndGet();
+            int index = counter.incrementAndGet();
             executors.submit(() -> {
-                instances.add(pipe.instanceFrom(instance));
+                LOG.info("processing document: " + index);
+                instances.addThruPipe(iterator.next());
             });
 
         }
-        executors.shutdown();
+
         LOG.info("Waiting for "+counter.get() + " instances ...");
-        try {
-            executors.awaitTermination(counter.get(), TimeUnit.MINUTES);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        executors.awaitTermination(counter.get(), TimeUnit.MINUTES);
         LOG.info("Completed!");
+
+        reader.close();
 
         return instances;
     }

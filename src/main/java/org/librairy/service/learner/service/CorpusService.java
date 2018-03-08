@@ -80,7 +80,7 @@ public class CorpusService {
     }
 
     private synchronized void initialize() throws IOException {
-        LOG.info("Corpus initialized");
+        LOG.info("Loading corpus..");
         filePath = getFilePath();
 
         if (filePath.toFile().exists()){
@@ -98,6 +98,7 @@ public class CorpusService {
 
         writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
         setClosed(false);
+        LOG.info("corpus initialized");
     }
 
     public void close() throws IOException {
