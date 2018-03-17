@@ -7,7 +7,7 @@
         </encoder>
     </appender>
 
-    <logger name="org.librairy" level="DEBUG"/>
+    <logger name="org.librairy" level="INFO"/>
     <logger name="cc.mallet.topics" level="INFO"/>
     <logger name="cc.mallet.topics.ParallelTopicModel" level="INFO"/>
 

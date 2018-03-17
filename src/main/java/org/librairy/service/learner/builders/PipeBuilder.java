@@ -1,6 +1,7 @@
 package org.librairy.service.learner.builders;
 
 import cc.mallet.pipe.*;
+import org.librairy.service.learner.service.LibrairyNlpClient;
 import org.librairy.service.nlp.facade.model.PoS;
 
 import java.util.ArrayList;
@@ -15,14 +16,14 @@ public class PipeBuilder {
     public PipeBuilder() {
     }
 
-    public Pipe build(String nlpEndpoint) {
+    public Pipe build(LibrairyNlpClient client, String language) {
         ArrayList pipeList = new ArrayList();
 
         // Read data from File objects
 
         pipeList.add(new Input2CharSequence("UTF-8"));
 
-        pipeList.add(new Lemmatizer(nlpEndpoint, Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE})));
+        pipeList.add(new Lemmatizer(client, language, Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE})));
 
         // Regular expression for what constitutes a token.
         //  This pattern includes Unicode letters, Unicode numbers,

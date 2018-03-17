@@ -10,6 +10,7 @@ import com.google.common.primitives.Doubles;
 import org.librairy.service.learner.builders.PipeBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,18 +23,19 @@ public class Inferencer {
     private static final Logger LOG = LoggerFactory.getLogger(Inferencer.class);
 
     private final TopicInferencer topicInferer;
-    private final String nlpEndpoint;
     private final LDALauncher ldaLauncher;
     private final String resourceFolder;
+    private final LibrairyNlpClient client;
+    private final String language;
 
-    public Inferencer(LDALauncher ldaLauncher, String nlpEndpoint, String resourceFolder) throws Exception {
+    public Inferencer(LDALauncher ldaLauncher, LibrairyNlpClient client, String language, String resourceFolder) throws Exception {
 
         LOG.info("Initializing a new Inferer...");
         this.topicInferer               = ldaLauncher.getTopicInferencer(resourceFolder);
-        this.nlpEndpoint                = nlpEndpoint;
         this.ldaLauncher                = ldaLauncher;
         this.resourceFolder             = resourceFolder;
-
+        this.client                     = client;
+        this.language                   = language;
     }
 
 
@@ -48,7 +50,7 @@ public class Inferencer {
         Integer numIterations = 100;
 
         Instance rawInstance = new Instance(data,target,name,source);
-        Pipe pipe = new PipeBuilder().build(nlpEndpoint);
+        Pipe pipe = new PipeBuilder().build(client, language);
         InstanceList instances = new InstanceList(pipe);
         instances.addThruPipe(rawInstance);
 

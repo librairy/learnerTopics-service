@@ -69,9 +69,13 @@ public class LDALauncher {
 
         // Use two parallel samplers, which each look at one half the corpus and combine
         //  statistics after every iteration.
-        int availableProcessors = Runtime.getRuntime().availableProcessors()/2;
-        LOG.info("Parallel model to: " + availableProcessors + " processors");
-        model.setNumThreads(availableProcessors);
+        int availableProcessors = Runtime.getRuntime().availableProcessors();
+        int parallelThreads = availableProcessors > 1? availableProcessors -1: 1;
+        LOG.info("Parallel model to: " + parallelThreads + " threads");
+        model.setNumThreads(parallelThreads);
+
+        // Disable print loglikelihood. (use for testing purposes)
+        model.printLogLikelihood = false;
 
         // Run the model for 50 iterations and stop (this is for testing only,
         //  for real applications, use 1000 to 2000 iterations)

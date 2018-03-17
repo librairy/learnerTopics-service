@@ -32,18 +32,24 @@ public class TrainingPoolManager {
     @Autowired
     CorpusService corpusService;
 
+    Boolean isTraining;
+
     private ExecutorService executors;
 
 
     @PostConstruct
     public void setup(){
         executors = Executors.newSingleThreadExecutor();
+        isTraining = false;
     }
 
     public Boolean train(Map<String,String> parameters) {
 
+        if (isTraining) return false;
+
         executors.submit(() -> {
             LOG.info("ready to create a new topic model from: " + parameters);
+            isTraining = true;
             LDAParameters ldaParameters = new LDAParameters(corpusService.getFilePath().toFile().getAbsolutePath(), resourceFolder);
 
             try {
@@ -56,10 +62,13 @@ public class TrainingPoolManager {
                 ldaLauncher.train(ldaParameters);
             } catch (IOException e) {
                 LOG.error("Error building a topic model from: " + parameters, e);
-            } catch(ClassCastException e){
+            } catch(ClassCastException e) {
                 LOG.error("Error reading parameters from: " + parameters, e);
+            } catch(Exception e){
+                LOG.error("Unexpected error during training phase", e);
+            }finally {
+                isTraining = false;
             }
-
 
         });
 

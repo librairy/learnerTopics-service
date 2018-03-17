@@ -28,6 +28,9 @@ public class InferencePoolManager {
     @Autowired
     LDALauncher ldaLauncher;
 
+    @Autowired
+    LibrairyNlpClient client;
+
     Map<String,Inferencer> inferencePool;
 
     @PostConstruct
@@ -40,10 +43,7 @@ public class InferencePoolManager {
         String id = "thread"+thread.getId();
         if (!inferencePool.containsKey(id)){
             LOG.info("Initializing Topic Inferencer for thread: " + id);
-
-            String nlpServiceEndpoint = nlpEndpoint.replace("%%", language);
-
-            Inferencer inferencer = new Inferencer(ldaLauncher,nlpServiceEndpoint,resourceFolder);
+            Inferencer inferencer = new Inferencer(ldaLauncher,client,language,resourceFolder);
             inferencePool.put(id,inferencer);
         }
         return inferencePool.get(id);

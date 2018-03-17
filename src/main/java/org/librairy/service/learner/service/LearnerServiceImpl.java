@@ -31,6 +31,9 @@ public class LearnerServiceImpl implements LearnerService {
     TopicsService topicsService;
 
     @Autowired
+    LibrairyNlpClient librairyNlpClient;
+
+    @Autowired
     InferencePoolManager inferencePoolManager;
 
     @Autowired
@@ -61,6 +64,7 @@ public class LearnerServiceImpl implements LearnerService {
         try {
             corpusService.remove();
             topicsService.remove();
+            librairyNlpClient.shutdown();
         } catch (IOException e) {
             throw new AvroRemoteException("IO Error",e);
         }
@@ -76,12 +80,14 @@ public class LearnerServiceImpl implements LearnerService {
         LOG.info("Training a new model from parameters: " + map + " with a corpus of " + corpusService.getNumDocs() + " docs");
         try {
             corpusService.close();
+            topicsService.remove();
         } catch (IOException e) {
             throw new AvroRemoteException("IO Error",e);
         }
+
         if (trainingPoolManager.train(map))
             return "building a new model";
-        else return "error setting corpus";
+        else return "There is currently a model training";
     }
 
     @Override

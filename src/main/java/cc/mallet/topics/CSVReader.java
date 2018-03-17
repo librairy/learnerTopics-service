@@ -6,8 +6,10 @@ import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import org.librairy.service.learner.builders.PipeBuilder;
 import org.librairy.service.learner.executors.ParallelExecutor;
+import org.librairy.service.learner.service.LibrairyNlpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -31,6 +33,9 @@ public class CSVReader {
     String nlpEndpoint;
 
 
+    @Autowired
+    LibrairyNlpClient client;
+
     @PostConstruct
     public void setup(){
 
@@ -43,11 +48,7 @@ public class CSVReader {
 
     public InstanceList getSerialInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex) throws IOException {
 
-        // Construct a new instance list, passing it the pipe we want to use to process instances.
-
-        String nlpServiceEndpoint = nlpEndpoint.replace("%%", language);
-
-        Pipe pipe = new PipeBuilder().build(nlpServiceEndpoint);
+        Pipe pipe = new PipeBuilder().build(client, language);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
@@ -69,10 +70,8 @@ public class CSVReader {
 
     public InstanceList getParallelInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex) throws IOException {
 
-        // Construct a new instance list, passing it the pipe we want to use to process instances.
-        String nlpServiceEndpoint = nlpEndpoint.replace("%%", language);
 
-        Pipe pipe = new PipeBuilder().build(nlpServiceEndpoint);
+        Pipe pipe = new PipeBuilder().build(client, language);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
@@ -88,17 +87,25 @@ public class CSVReader {
         AtomicInteger counter = new AtomicInteger();
         while(iterator.hasNext()){
 
-            int index = counter.incrementAndGet();
-            final Instance rawInstance = iterator.next();
-            executors.submit(() -> {
-                LOG.info("processing document: " + index);
-                instances.addThruPipe(rawInstance);
-            });
+            try{
+                final Instance rawInstance = iterator.next();
+                executors.submit(() -> {
+                    try{
+                        LOG.info("processing document: " + counter.incrementAndGet());
+                        instances.addThruPipe(rawInstance);
+                    }catch (Exception e){
+                        LOG.warn("Instance not handled by pipe");
+                    }
+                });
+            }catch (Exception e){
+                LOG.error("Error reading next instance",e);
+                break;
+            }
 
         }
 
-        LOG.info("Waiting for "+counter.get() + " instances ...");
-        executors.awaitTermination(counter.get(), TimeUnit.MINUTES);
+        LOG.info("Waiting for finish instances ...");
+        executors.awaitTermination(1, TimeUnit.MINUTES);
         LOG.info("Completed!");
 
         reader.close();

@@ -15,6 +15,7 @@ import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
+import org.librairy.service.learner.service.LibrairyNlpClient;
 import org.librairy.service.nlp.facade.model.Form;
 import org.librairy.service.nlp.facade.model.PoS;
 import org.librairy.service.nlp.facade.rest.model.ProcessRequest;
@@ -34,7 +35,7 @@ public class Lemmatizer extends Pipe implements Serializable {
 
     private static final Logger LOG = LoggerFactory.getLogger(Lemmatizer.class);
     private final List<PoS> pos;
-    private final String annotatorEndpoint;
+
 
     static{
         Unirest.setDefaultHeader("Accept", MediaType.APPLICATION_JSON_VALUE);
@@ -64,11 +65,15 @@ public class Lemmatizer extends Pipe implements Serializable {
         });
     }
 
+    private final LibrairyNlpClient client;
+    private final String language;
 
-    public Lemmatizer(String endpoint, List<PoS> pos){
+
+    public Lemmatizer(LibrairyNlpClient client, String language, List<PoS> pos){
 
         this.pos        = pos;
-        this.annotatorEndpoint = endpoint;
+        this.client     = client;
+        this.language   = language;
 
     }
 
@@ -82,34 +87,33 @@ public class Lemmatizer extends Pipe implements Serializable {
 
         LOG.info("retrieving lemmas for text: '" + description + "' ..");
 
-        CharSequence rawData = (CharSequence) carrier.getData();
+        String tokens = client.lemmatize(carrier.getData().toString(), language, this.pos);
+        carrier.setData(tokens);
 
-        int maxRetries = 3;
-
-        while(maxRetries-- > 0){
-            try {
-
-                ProcessRequest req = new ProcessRequest(rawData.toString(), this.pos, Form.LEMMA);
-                HttpResponse<ProcessResult> processResult = Unirest.post(annotatorEndpoint + "/process")
-                        .body(req)
-                        .asObject(ProcessResult.class);
-
-                if (processResult.getStatus() == 200){
-                    String tokens = processResult.getBody().getProcessedText();
-                    carrier.setData(tokens);
-                }else{
-                    LOG.warn("Error from annotator: " + processResult.getStatus() + " : " + processResult.getStatusText());
-                }
-                break;
-            } catch (UnirestException e) {
-                LOG.warn("Lemmatizer service is down!",e);
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e1) {
-                    e1.printStackTrace();
-                }
-            }
-        }
+//        int maxRetries = 3;
+//
+//        while(maxRetries-- > 0){
+//            try {
+//
+//                ProcessRequest req = new ProcessRequest(rawData.toString(), this.pos, Form.LEMMA);
+//                HttpResponse<ProcessResult> processResult = Unirest.post(annotatorEndpoint + "/process")
+//                        .body(req)
+//                        .asObject(ProcessResult.class);
+//
+//                if (processResult.getStatus() == 200){
+//                }else{
+//                    LOG.warn("Error from annotator: " + processResult.getStatus() + " : " + processResult.getStatusText());
+//                }
+//                break;
+//            } catch (UnirestException e) {
+//                LOG.warn("Lemmatizer service is down!",e);
+//                try {
+//                    Thread.sleep(2000);
+//                } catch (InterruptedException e1) {
+//                    e1.printStackTrace();
+//                }
+//            }
+//        }
 
 
 

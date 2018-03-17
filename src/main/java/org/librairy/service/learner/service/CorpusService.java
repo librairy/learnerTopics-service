@@ -1,6 +1,8 @@
 package org.librairy.service.learner.service;
 
 import com.google.common.base.Strings;
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages_zh_CN;
 import org.librairy.service.learner.facade.model.Document;
 import org.slf4j.Logger;
@@ -38,6 +40,17 @@ public class CorpusService {
     private AtomicInteger counter   = new AtomicInteger(0);
     private String updated = "";
 
+
+
+    private final Escaper escaper = Escapers.builder()
+            .addEscape('\'',"")
+            .addEscape('\"',"")
+            .addEscape('\n'," ")
+            .addEscape('\r'," ")
+            .addEscape('\t'," ")
+            .build();
+
+
     @PostConstruct
     public void setup() throws IOException {
         initialize();
@@ -59,11 +72,11 @@ public class CorpusService {
     public synchronized void add(Document document) throws IOException {
         StringBuilder row = new StringBuilder();
         row.append(document.getId()).append(SEPARATOR);
-        row.append(document.getName()).append(SEPARATOR);
+        row.append(escaper.escape(document.getName())).append(SEPARATOR);
         String labels = document.getLabels().stream().collect(Collectors.joining(" "));
         if (Strings.isNullOrEmpty(labels)) labels = "default";
         row.append(labels).append(SEPARATOR);
-        row.append(document.getText());
+        row.append(escaper.escape(document.getText()));
         updated = TimeService.now();
         if (isClosed) initialize();
         writer.write(row.toString()+"\n");
