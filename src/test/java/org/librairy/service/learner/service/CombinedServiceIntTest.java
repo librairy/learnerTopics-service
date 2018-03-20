@@ -8,8 +8,8 @@ import org.junit.runner.RunWith;
 import org.librairy.service.learner.Application;
 import org.librairy.service.learner.facade.model.Document;
 import org.librairy.service.learner.facade.model.LearnerService;
+import org.librairy.service.modeler.facade.model.Dimension;
 import org.librairy.service.modeler.facade.model.ModelerService;
-import org.librairy.service.modeler.facade.model.Topic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,7 +73,7 @@ public class CombinedServiceIntTest {
         LOG.info("Waiting for finish");
         Thread.sleep(5000);
 
-        List<Topic> topics = modelerService.topics();
+        List<Dimension> topics = modelerService.dimensions();
 
         LOG.info("Topics: " + topics);
     }
