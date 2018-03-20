@@ -31,7 +31,7 @@ public class TopicsRestTest {
     private static final Logger LOG = LoggerFactory.getLogger(TopicsRestTest.class);
 
     @Autowired
-    RestTopicsController service;
+    RestDimensionsController service;
 
     @Before
     public void setup(){

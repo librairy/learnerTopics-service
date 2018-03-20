@@ -1,10 +1,10 @@
 package org.librairy.service.learner.service;
 
 import org.apache.avro.AvroRemoteException;
+import org.librairy.service.modeler.facade.model.Dimension;
+import org.librairy.service.modeler.facade.model.Element;
 import org.librairy.service.modeler.facade.model.ModelerService;
-import org.librairy.service.modeler.facade.model.Topic;
-import org.librairy.service.modeler.facade.model.TopicDistribution;
-import org.librairy.service.modeler.facade.model.Word;
+import org.librairy.service.modeler.facade.model.Relevance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,26 +48,26 @@ public class ModelerServiceImpl implements ModelerService {
     }
 
     @Override
-    public List<Topic> topics() throws AvroRemoteException {
+    public List<Dimension> dimensions() throws AvroRemoteException {
         return topicsService.getTopics();
     }
 
     @Override
-    public List<Word> words(int topicId, int maxWords) throws AvroRemoteException {
+    public List<Element> elements(int topicId, int maxWords) throws AvroRemoteException {
         return topicsService.getWords(topicId,maxWords);
     }
 
     @Override
-    public List<TopicDistribution> inference(String s) throws AvroRemoteException {
+    public List<Relevance> inference(String s) throws AvroRemoteException {
         try {
 
             List<Double> shape = shape(s);
-            List<Topic> topics = topics();
+            List<Dimension> topics = dimensions();
 
-            List<TopicDistribution> topicDistributions = new ArrayList<>();
+            List<Relevance> topicDistributions = new ArrayList<>();
             for(int i=0;i<topics.size();i++){
-                TopicDistribution topicDistribution = new TopicDistribution();
-                topicDistribution.setTopic(topics.get(i));
+                Relevance topicDistribution = new Relevance();
+                topicDistribution.setDimension(topics.get(i));
                 topicDistribution.setScore(shape.get(i));
                 topicDistributions.add(topicDistribution);
             }

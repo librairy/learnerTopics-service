@@ -21,7 +21,7 @@ import javax.annotation.PreDestroy;
 
 @RestController
 @RequestMapping("/shape")
-@Api(tags="/shape", description = "topics as vectors management")
+@Api(tags="/shape", description = "vector management")
 public class RestShapeController {
 
     private static final Logger LOG = LoggerFactory.getLogger(RestShapeController.class);
@@ -39,7 +39,7 @@ public class RestShapeController {
 
     }
 
-    @ApiOperation(value = "topics vector", nickname = "postShape", response=Shape.class)
+    @ApiOperation(value = "obtain a probabilistic vector", nickname = "postShape", response=Shape.class)
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Success", response = Shape.class),
     })

@@ -6,8 +6,8 @@ import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.IDSorter;
 import org.apache.avro.AvroRemoteException;
-import org.librairy.service.modeler.facade.model.Topic;
-import org.librairy.service.modeler.facade.model.Word;
+import org.librairy.service.modeler.facade.model.Dimension;
+import org.librairy.service.modeler.facade.model.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +35,7 @@ public class TopicsService {
     LDALauncher ldaLauncher;
 
     private ArrayList topics = new ArrayList();
-    private Map<Integer, List<Word>> words = new HashMap<>();
+    private Map<Integer, List<Element>> words = new HashMap<>();
     private LDAParameters parameters;
 
     @PostConstruct
@@ -66,7 +66,7 @@ public class TopicsService {
 
             IntStream.range(0,topicModel.getNumTopics()).forEach(id -> {
 
-                Topic topic = new Topic();
+                Dimension topic = new Dimension();
 
                 topic.setId(id);
                 topic.setName((String)topicModel.getTopicAlphabet().lookupObject(id));
@@ -82,14 +82,14 @@ public class TopicsService {
         }
     }
 
-    public Map<Integer,List<Word>> getTopWords(ParallelTopicModel topicModel, int numWords) throws Exception {
+    public Map<Integer,List<Element>> getTopWords(ParallelTopicModel topicModel, int numWords) throws Exception {
 
         int numTopics = topicModel.getNumTopics();
         Alphabet alphabet = topicModel.getAlphabet();
 
         ArrayList<TreeSet<IDSorter>> topicSortedWords = topicModel.getSortedWords();
 
-        Map<Integer,List<Word>> result = new HashMap<>();
+        Map<Integer,List<Element>> result = new HashMap<>();
 
         for (int topic = 0; topic < numTopics; topic++) {
 
@@ -107,12 +107,12 @@ public class TopicsService {
             int limit = numWords;
             if (sortedWords.size() < numWords) { limit = sortedWords.size(); }
 
-            List<Word> words = new ArrayList<>();
+            List<Element> words = new ArrayList<>();
 
             Iterator<IDSorter> iterator = sortedWords.iterator();
             for (int i=0; i < limit; i++) {
                 IDSorter info = iterator.next();
-                words.add(new Word(String.valueOf(alphabet.lookupObject(info.getID())),info.getWeight()/totalWeight));
+                words.add(new Element(String.valueOf(alphabet.lookupObject(info.getID())),info.getWeight()/totalWeight));
             }
             result.put(topic,words);
         }
@@ -120,11 +120,11 @@ public class TopicsService {
         return result;
     }
 
-    public List<Topic> getTopics() throws AvroRemoteException {
+    public List<Dimension> getTopics() throws AvroRemoteException {
         return topics;
     }
 
-    public List<Word> getWords(int topicId, int maxWords) throws AvroRemoteException {
+    public List<Element> getWords(int topicId, int maxWords) throws AvroRemoteException {
         if (!words.containsKey(topicId)) return Collections.emptyList();
         return words.get(topicId).stream().limit(maxWords).collect(Collectors.toList());
 
