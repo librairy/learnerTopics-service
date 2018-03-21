@@ -167,7 +167,7 @@
 			  </exclusions>
 		  </dependency>
 
-		  <!-- librAIry Model Service -->
+		  <!-- librAIry Modeler Service -->
 		  <dependency>
 			  <groupId>org.librairy</groupId>
 			  <artifactId>modeler-topics-service</artifactId>

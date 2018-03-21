@@ -39,7 +39,7 @@ public class CSVReader {
 
     @PostConstruct
     public void setup(){
-
+        LOG.info("component initialized");
     }
 
     public void setNlpEndpoint(String nlpEndpoint) {
