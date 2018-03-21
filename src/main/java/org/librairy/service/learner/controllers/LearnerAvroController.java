@@ -11,12 +11,12 @@ import javax.annotation.PreDestroy;
 import java.io.IOException;
 
 @Component
-public class AvroController {
+public class LearnerAvroController {
 
     @Autowired
     LearnerService service;
 
-    @Value("#{environment['AVRO_PORT']?:${avro.port}}")
+    @Value("#{environment['LEARNER_AVRO_PORT']?:${learner.avro.port}}")
     Integer port;
 
     String host = "0.0.0.0";

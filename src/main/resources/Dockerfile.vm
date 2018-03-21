@@ -1,0 +1,10 @@
+FROM librairy/modeler-topics-service:latest
+ADD model /bin
+ENV SWAGGER_TITLE="$title"
+ENV SWAGGER_DESCRIPTION="$description"
+ENV SWAGGER_CONTACT_NAME="$contactName"
+ENV SWAGGER_CONTACT_EMAIL="$contactEmail"
+ENV SWAGGER_CONTACT_URL="$contactUrl"
+ENV SWAGGER_LICENSE_NAME="$licenseName"
+ENV SWAGGER_LICENSE_URL="$licenseUrl"
+ENTRYPOINT exec java $JAVA_OPTS -server -jar /app.jar

@@ -28,7 +28,7 @@ public class AvroTest {
 
 
         String host     = "localhost";
-        Integer port    = 65115;
+        Integer port    = 65112;
 
         client.open(host,port);
 

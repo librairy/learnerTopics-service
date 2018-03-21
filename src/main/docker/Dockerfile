@@ -1,4 +1,11 @@
 FROM anapsix/alpine-java:8u162b12_server-jre
+# update packages and install docker
+RUN  \
+  apk update && \
+  apk add docker && \
+  apk add openrc && \
+  rc-update add docker boot
+
 VOLUME /tmp
 VOLUME /librairy
 ADD learner-topics-service.jar /app.jar

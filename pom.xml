@@ -40,10 +40,10 @@
 
 	  <!-- Project Dependencies -->
 	  <commons-lang3.version>3.5</commons-lang3.version>
+	  <docker.version>8.7.1</docker.version>
 	  <joda.version>2.9.9</joda.version>
 	  <junit.version>4.12</junit.version>
-	  <librairy.nlp.version>[0.1,)</librairy.nlp.version>
-	  <librairy.model.version>[1.0,)</librairy.model.version>
+	  <librairy.modeler.version>[0.1,)</librairy.modeler.version>
 	  <librairy.learner.version>[1.0,)</librairy.learner.version>
 	  <librairy.swagger.version>[0.3,)</librairy.swagger.version>
 	  <logback.version>1.1.3</logback.version>
@@ -51,6 +51,8 @@
 	  <mockito.version>1.9.5</mockito.version>
 	  <testutils.version>1.0.0</testutils.version>
 	  <unirest.version>1.4.9</unirest.version>
+      <velocity.version>1.7</velocity.version>
+      <velocity.tool.version>2.0</velocity.tool.version>
       </properties>
   
 	  <parent>
@@ -69,18 +71,11 @@
 				  <version>${librairy.learner.version}</version>
 			  </dependency>
 
-			  <!-- librAIry Model Service -->
+			  <!-- librAIry Modeler Service -->
 			  <dependency>
 				  <groupId>org.librairy</groupId>
-				  <artifactId>modeler-service-facade</artifactId>
-				  <version>${librairy.model.version}</version>
-			  </dependency>
-
-			  <!-- librAIry NLP Service -->
-			  <dependency>
-				  <groupId>org.librairy</groupId>
-				  <artifactId>nlp-service-facade</artifactId>
-				  <version>${librairy.nlp.version}</version>
+				  <artifactId>modeler-topics-service</artifactId>
+				  <version>${librairy.modeler.version}</version>
 			  </dependency>
 
 			  <!-- librAIry Swagger -->
@@ -101,6 +96,23 @@
 				  <groupId>com.mashape.unirest</groupId>
 				  <artifactId>unirest-java</artifactId>
 				  <version>${unirest.version}</version>
+			  </dependency>
+
+			  <!-- Docker Libraries -->
+			  <dependency>
+				  <groupId>com.spotify</groupId>
+				  <artifactId>docker-client</artifactId>
+				  <version>${docker.version}</version>
+			  </dependency>
+			  <dependency>
+				  <groupId>org.apache.velocity</groupId>
+				  <artifactId>velocity</artifactId>
+				  <version>${velocity.version}</version>
+			  </dependency>
+			  <dependency>
+				  <groupId>org.apache.velocity</groupId>
+				  <artifactId>velocity-tools</artifactId>
+				  <version>${velocity.tool.version}</version>
 			  </dependency>
 
 			  <!-- Log Libraries -->
@@ -158,19 +170,7 @@
 		  <!-- librAIry Model Service -->
 		  <dependency>
 			  <groupId>org.librairy</groupId>
-			  <artifactId>modeler-service-facade</artifactId>
-			  <exclusions>
-				  <exclusion>
-					  <groupId>org.mortbay.jetty</groupId>
-					  <artifactId>servlet-api</artifactId>
-				  </exclusion>
-			  </exclusions>
-		  </dependency>
-
-		  <!-- librAIry NLP Service -->
-		  <dependency>
-			  <groupId>org.librairy</groupId>
-			  <artifactId>nlp-service-facade</artifactId>
+			  <artifactId>modeler-topics-service</artifactId>
 			  <exclusions>
 				  <exclusion>
 					  <groupId>org.mortbay.jetty</groupId>
@@ -195,6 +195,33 @@
 			  <groupId>com.mashape.unirest</groupId>
 			  <artifactId>unirest-java</artifactId>
 		  </dependency>
+
+          <!-- Docker Dependencies -->
+          <dependency>
+              <groupId>com.spotify</groupId>
+              <artifactId>docker-client</artifactId>
+          </dependency>
+          <dependency>
+              <groupId>org.apache.velocity</groupId>
+              <artifactId>velocity</artifactId>
+			  <exclusions>
+				  <exclusion>
+					  <groupId>javax.servlet</groupId>
+					  <artifactId>servlet-api</artifactId>
+				  </exclusion>
+			  </exclusions>
+          </dependency>
+          <dependency>
+              <groupId>org.apache.velocity</groupId>
+              <artifactId>velocity-tools</artifactId>
+			  <exclusions>
+				  <exclusion>
+					  <groupId>javax.servlet</groupId>
+					  <artifactId>servlet-api</artifactId>
+				  </exclusion>
+			  </exclusions>
+          </dependency>
+
 
 		  <!-- Spring Security -->
 		  <dependency>

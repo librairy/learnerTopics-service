@@ -1,31 +1,22 @@
 package org.librairy.service.learner.builders;
 
-import cc.mallet.pipe.CharSequence2TokenSequence;
-import cc.mallet.pipe.Input2CharSequence;
 import cc.mallet.pipe.Pipe;
-import cc.mallet.pipe.SerialPipes;
 import cc.mallet.types.Instance;
-import cc.mallet.types.SingleInstanceIterator;
-import cc.mallet.types.TokenSequence;
-import cc.mallet.util.CharSequenceLexer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.google.common.base.Strings;
-import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.ObjectMapper;
 import com.mashape.unirest.http.Unirest;
-import com.mashape.unirest.http.exceptions.UnirestException;
-import org.librairy.service.learner.service.LibrairyNlpClient;
-import org.librairy.service.nlp.facade.model.Form;
+import org.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.librairy.service.nlp.facade.model.PoS;
-import org.librairy.service.nlp.facade.rest.model.ProcessRequest;
-import org.librairy.service.nlp.facade.rest.model.ProcessResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 
-import java.io.*;
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.List;
 
 /**

@@ -1,7 +1,7 @@
 package org.librairy.service.learner.builders;
 
 import cc.mallet.pipe.*;
-import org.librairy.service.learner.service.LibrairyNlpClient;
+import org.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.librairy.service.nlp.facade.model.PoS;
 
 import java.util.ArrayList;
