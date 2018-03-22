@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Collections;
 
 @RestController
 @RequestMapping("/documents")
@@ -49,6 +50,7 @@ public class RestDocumentsController {
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
     public ResponseEntity<Result> add(@RequestBody Document document)  {
         try {
+            if (document.getLabels() == null) document.setLabels(Collections.emptyList());
             String result = service.addDocument(document);
             return new ResponseEntity(new Result(result), HttpStatus.CREATED);
         } catch (AvroRemoteException e) {

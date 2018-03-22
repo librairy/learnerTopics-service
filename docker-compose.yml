@@ -1,0 +1,13 @@
+version: '2'
+services:
+  nlp-en-service:
+    image: librairy/nlp-en-service:latest
+  learner-topics:
+    image: librairy/learner-topics-service:latest
+    ports:
+     - "8080:7777"
+    environment:
+      LIBRAIRY_API_USERS: learner:oeg2018
+    volumes:
+    - .:/librairy
+    - /var/run/docker.sock:/var/run/docker.sock
