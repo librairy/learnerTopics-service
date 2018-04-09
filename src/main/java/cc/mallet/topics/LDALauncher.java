@@ -52,7 +52,7 @@ public class LDALauncher {
 
         Instant startProcess = Instant.now();
 
-        InstanceList instances = csvReader.getParallelInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex());
+        InstanceList instances = csvReader.getSerialInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),false);
 
 
         // Create a model with 100 topics, alpha_t = 0.01, beta_w = 0.01
@@ -67,7 +67,7 @@ public class LDALauncher {
         String durationProcess = ChronoUnit.HOURS.between(startProcess, endProcess) + "hours "
                 + ChronoUnit.MINUTES.between(startProcess, endProcess) % 60 + "min "
                 + (ChronoUnit.SECONDS.between(startProcess, endProcess) % 60) + "secs";
-        LOG.info("Corpus processed in: " + durationProcess);
+        LOG.info("Corpus ("+size+") processed in: " + durationProcess);
 
         // Use two parallel samplers, which each look at one half the corpus and combine
         //  statistics after every iteration.

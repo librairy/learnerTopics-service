@@ -71,7 +71,13 @@ public class DocumentsIntTest {
         AtomicInteger counter = new AtomicInteger();
         for(String text: texts){
 
-            Document document = new Document(Document.newBuilder().setId(String.valueOf(text.hashCode())).setName("doc-"+counter.incrementAndGet()).setText(text).build());
+            String label = counter.get()%2==0? "A" : "B";
+            Document document = new Document(Document.newBuilder()
+                    .setId(String.valueOf(text.hashCode()))
+                    .setName("doc-"+counter.incrementAndGet())
+                    .setText(text)
+                    .setLabels(Arrays.asList(new String[]{label}))
+                    .build());
 
             HttpResponse<JsonNode> res = Unirest
                     .post("http://localhost:8080/documents")

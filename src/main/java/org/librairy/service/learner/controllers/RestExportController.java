@@ -50,6 +50,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
@@ -69,6 +71,9 @@ public class RestExportController {
 
     private VelocityEngine velocityEngine;
 
+    private ExecutorService dockerExecutor;
+
+
     @PostConstruct
     public void setup() throws IOException {
 
@@ -76,6 +81,8 @@ public class RestExportController {
         velocityEngine.setProperty(RuntimeConstants.RESOURCE_LOADER, "classpath");
         velocityEngine.setProperty("classpath.resource.loader.class", ClasspathResourceLoader.class.getName());
         velocityEngine.init();
+
+        dockerExecutor = Executors.newSingleThreadExecutor();
 
         LOG.info("Service initialized");
     }
@@ -102,8 +109,6 @@ public class RestExportController {
 
             // Create a client based on DOCKER_HOST and DOCKER_CERT_PATH env vars
 //            DockerClient dockerClient = new DefaultDockerClient("unix:///var/run/docker.sock");
-
-
 
 
 
@@ -215,16 +220,26 @@ public class RestExportController {
 
 //            dockerClient.push(export.getCredentials().getRepository());
 
-            final AnsiProgressHandler ansiProgressHandler = new AnsiProgressHandler();
-            final DigestExtractingProgressHandler handler = new DigestExtractingProgressHandler(ansiProgressHandler);
-            try {
-                LOG.info("Pushing " + imageName);
-                dockerClient.push(imageName, handler, credentials);
-            }catch (Exception e){
-                LOG.error("Error on push: ", e);
-            }
+            dockerExecutor.submit(new Runnable() {
+                @Override
+                public void run() {
+                    try{
+                        final AnsiProgressHandler ansiProgressHandler = new AnsiProgressHandler();
+                        final DigestExtractingProgressHandler handler = new DigestExtractingProgressHandler(ansiProgressHandler);
+                        try {
+                            LOG.info("Pushing " + imageName);
+                            dockerClient.push(imageName, handler, credentials);
+                        }catch (Exception e){
+                            LOG.error("Error on push: ", e);
+                        }
 
-            dockerClient.removeImage(imageName);
+                        dockerClient.removeImage(imageName);
+
+                    }catch (Exception e){
+                        LOG.warn("Error pushing docker image",e);
+                    }
+                }
+            });
 
             return new ResponseEntity(new Result("docker pull " + export.getCredentials().getRepository()), HttpStatus.CREATED);
         } catch (Exception e) {

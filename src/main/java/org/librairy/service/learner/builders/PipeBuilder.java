@@ -16,7 +16,7 @@ public class PipeBuilder {
     public PipeBuilder() {
     }
 
-    public Pipe build(LibrairyNlpClient client, String language) {
+    public Pipe build(LibrairyNlpClient client, String language, Boolean enableTarget) {
         ArrayList pipeList = new ArrayList();
 
         // Read data from File objects
@@ -54,7 +54,7 @@ public class PipeBuilder {
         //  which has an index in a Label alphabet.
 //        pipeList.add(new Target2Label());
 
-//        pipeList.add(new TargetStringToFeatures());
+        if (enableTarget) pipeList.add(new TargetStringToFeatures());
 
 
         // Now convert the sequence of features to a sparse vector,

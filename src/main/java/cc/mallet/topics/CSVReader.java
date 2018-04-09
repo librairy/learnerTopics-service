@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
@@ -33,7 +30,6 @@ public class CSVReader {
     @Value("#{environment['NLP_ENDPOINT']?:'${nlp.endpoint}'}")
     String nlpEndpoint;
 
-
     @Autowired
     LibrairyNlpClient client;
 
@@ -47,9 +43,10 @@ public class CSVReader {
     }
 
 
-    public InstanceList getSerialInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex) throws IOException {
 
-        Pipe pipe = new PipeBuilder().build(client, language);
+    public InstanceList getSerialInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget) throws IOException {
+
+        Pipe pipe = new PipeBuilder().build(client, language, enableTarget);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
@@ -69,10 +66,10 @@ public class CSVReader {
         return instances;
     }
 
-    public InstanceList getParallelInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex) throws IOException {
+    public InstanceList getParallelInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget) throws IOException {
 
 
-        Pipe pipe = new PipeBuilder().build(client, language);
+        Pipe pipe = new PipeBuilder().build(client, language, enableTarget);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
@@ -95,7 +92,7 @@ public class CSVReader {
                         LOG.info("processing document: " + counter.incrementAndGet());
                         instances.addThruPipe(rawInstance);
                     }catch (Exception e){
-                        LOG.warn("Instance not handled by pipe");
+                        LOG.warn("Instance not handled by pipe",e);
                     }
                 });
             }catch (Exception e){
