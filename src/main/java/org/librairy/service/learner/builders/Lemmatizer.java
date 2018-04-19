@@ -80,7 +80,7 @@ public class Lemmatizer extends Pipe implements Serializable {
 
         String tokens = client.lemmatize(carrier.getData().toString(), language, this.pos);
         carrier.setData(tokens);
-
+        LOG.info("retrieved: " + tokens);
 //        int maxRetries = 3;
 //
 //        while(maxRetries-- > 0){

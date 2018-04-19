@@ -32,8 +32,7 @@ public class PipeBuilder {
         //    "\\w+"    ( A-Z, a-z, 0-9, _ )
         //    "[\\p{L}\\p{N}_]+|[\\p{P}]+"   (a group of only letters and numbers OR
         //                                    a group of only punctuation marks)
-        Pattern tokenPattern =
-                Pattern.compile("[\\p{L}\\p{N}_]+");
+        Pattern tokenPattern = Pattern.compile("[\\p{L}\\p{N}_]+");
 
         // Tokenize raw strings
         pipeList.add(new CharSequence2TokenSequence(tokenPattern));

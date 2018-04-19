@@ -71,10 +71,11 @@ public class CombinedServiceIntTest {
         LOG.info("Result: " + result);
 
         LOG.info("Waiting for finish");
-        Thread.sleep(500000);
+        Thread.sleep(10000);
 
         List<Dimension> topics = modelerService.dimensions();
 
         LOG.info("Topics: " + topics);
+
     }
 }

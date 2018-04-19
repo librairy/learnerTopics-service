@@ -52,7 +52,10 @@ public class LDALauncher {
 
         Instant startProcess = Instant.now();
 
-        InstanceList instances = csvReader.getSerialInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),false);
+
+
+        //InstanceList instances = csvReader.getSerialInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),false);
+        InstanceList instances = csvReader.getParallelInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),false);
 
 
         // Create a model with 100 topics, alpha_t = 0.01, beta_w = 0.01

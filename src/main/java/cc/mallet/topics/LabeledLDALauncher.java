@@ -55,7 +55,7 @@ public class LabeledLDALauncher {
 
         Instant startProcess = Instant.now();
 
-        InstanceList instances = csvReader.getSerialInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),true);
+        InstanceList instances = csvReader.getParallelInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),true);
 
 
         LOG.info("Data loaded.");
