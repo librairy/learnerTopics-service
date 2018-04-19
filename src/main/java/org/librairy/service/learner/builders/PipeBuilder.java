@@ -1,29 +1,48 @@
 package org.librairy.service.learner.builders;
 
 import cc.mallet.pipe.*;
+import com.google.common.base.Strings;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.librairy.service.nlp.facade.model.PoS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 public class PipeBuilder {
 
+    private static final Logger LOG = LoggerFactory.getLogger(PipeBuilder.class);
+
     public PipeBuilder() {
     }
 
-    public Pipe build(LibrairyNlpClient client, String language, Boolean enableTarget) {
+    public Pipe build(LibrairyNlpClient client, String language, String pos, Boolean enableTarget) {
         ArrayList pipeList = new ArrayList();
 
         // Read data from File objects
 
         pipeList.add(new Input2CharSequence("UTF-8"));
 
-        pipeList.add(new Lemmatizer(client, language, Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE})));
+        List<PoS> posList = Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE});
+
+        if (!Strings.isNullOrEmpty(pos)){
+            try{
+                posList = Arrays.asList(pos.split(" ")).stream().map(i -> PoS.valueOf(i.toUpperCase())).collect(Collectors.toList());
+            }catch (Exception e){
+                LOG.warn("Invalid PoS values: " + pos);
+            }
+        }
+
+        LOG.info("PoS: " + posList);
+
+        pipeList.add(new Lemmatizer(client, language, posList));
 
         // Regular expression for what constitutes a token.
         //  This pattern includes Unicode letters, Unicode numbers,

@@ -80,33 +80,6 @@ public class Lemmatizer extends Pipe implements Serializable {
 
         String tokens = client.lemmatize(carrier.getData().toString(), language, this.pos);
         carrier.setData(tokens);
-        LOG.info("retrieved: " + tokens);
-//        int maxRetries = 3;
-//
-//        while(maxRetries-- > 0){
-//            try {
-//
-//                ProcessRequest req = new ProcessRequest(rawData.toString(), this.pos, Form.LEMMA);
-//                HttpResponse<ProcessResult> processResult = Unirest.post(annotatorEndpoint + "/process")
-//                        .body(req)
-//                        .asObject(ProcessResult.class);
-//
-//                if (processResult.getStatus() == 200){
-//                }else{
-//                    LOG.warn("Error from annotator: " + processResult.getStatus() + " : " + processResult.getStatusText());
-//                }
-//                break;
-//            } catch (UnirestException e) {
-//                LOG.warn("Lemmatizer service is down!",e);
-//                try {
-//                    Thread.sleep(2000);
-//                } catch (InterruptedException e1) {
-//                    e1.printStackTrace();
-//                }
-//            }
-//        }
-
-
 
         return carrier;
     }
@@ -118,12 +91,10 @@ public class Lemmatizer extends Pipe implements Serializable {
 
     private void writeObject (ObjectOutputStream out) throws IOException {
         out.writeInt(CURRENT_SERIAL_VERSION);
-        //out.writeObject(lexer);
     }
 
     private void readObject (ObjectInputStream in) throws IOException, ClassNotFoundException {
         int version = in.readInt ();
-        //lexer = (CharSequenceLexer) in.readObject();
     }
 
 

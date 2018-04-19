@@ -61,6 +61,8 @@ public class TrainingPoolManager {
                 if (parameters.containsKey("topics"))       ldaParameters.setNumTopics(Integer.valueOf(parameters.get("topics")));
                 if (parameters.containsKey("iterations"))   ldaParameters.setNumIterations(Integer.valueOf(parameters.get("iterations")));
                 if (parameters.containsKey("language"))     ldaParameters.setLanguage(parameters.get("language"));
+                if (parameters.containsKey("pos"))          ldaParameters.setPos(parameters.get("pos"));
+                if (parameters.containsKey("retries"))      ldaParameters.setNumRetries(Integer.valueOf(parameters.get("retries")));
 
                 modelFactory.train(parameters,ldaParameters);
             } catch (IOException e) {

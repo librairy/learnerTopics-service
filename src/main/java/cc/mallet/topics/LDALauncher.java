@@ -44,6 +44,8 @@ public class LDALauncher {
         int numTopics       = parameters.getNumTopics();
         Integer numTopWords = parameters.getNumTopWords();
         Integer numIterations = parameters.getNumIterations();
+        String pos          = parameters.getPos();
+        Integer maxRetries  = parameters.getNumRetries();
 
 
 
@@ -55,13 +57,17 @@ public class LDALauncher {
 
 
         //InstanceList instances = csvReader.getSerialInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),false);
-        InstanceList instances = csvReader.getParallelInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),false);
+        InstanceList instances = csvReader.getParallelInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),false, pos);
 
 
         // Create a model with 100 topics, alpha_t = 0.01, beta_w = 0.01
         //  Note that the first parameter is passed as the sum over topics, while
         //  the second is the parameter for a single dimension of the Dirichlet prior.
         ParallelTopicModel model = new ParallelTopicModel(numTopics, numTopics*alpha, beta);
+
+
+
+
 
         model.addInstances(instances);
 
@@ -94,6 +100,12 @@ public class LDALauncher {
         Integer intervalTopicDisplay = numIterations/2;
         model.setTopicDisplay(intervalTopicDisplay,5);
         LOG.info("Interval Topic Display: " + intervalTopicDisplay);
+
+
+        Integer intervalTopicValidation = numIterations/2;
+        model.setTopicValidation(intervalTopicValidation,10);
+        model.maxRetries = maxRetries;
+        LOG.info("Interval Topic Validation: " + intervalTopicValidation);
 
         model.setNumIterations(numIterations);
         LOG.info("Num Iterations: " + numIterations);
@@ -145,6 +157,10 @@ public class LDALauncher {
                 + ChronoUnit.MINUTES.between(startModel, endModel) % 60 + "min "
                 + (ChronoUnit.SECONDS.between(startModel, endModel) % 60) + "secs";
         LOG.info("Topic Model created in: " + durationModel);
+
+        LOG.info("Calculating logLikelihood...");
+        double loglikelihood = model.modelLogLikelihood();
+        LOG.info("logLikelihood = " + loglikelihood);
 
 
         LOG.info("saving model to disk .. ");

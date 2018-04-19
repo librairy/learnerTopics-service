@@ -1,5 +1,6 @@
 package org.librairy.service.learner.service;
 
+import com.google.common.collect.ImmutableMap;
 import org.apache.avro.AvroRemoteException;
 import org.junit.After;
 import org.junit.Before;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -60,18 +62,25 @@ public class CombinedServiceIntTest {
     @Test
     public void train() throws IOException, InterruptedException {
 
+        learnerService.reset();
 
         for (String text : texts){
-            Document document = Document.newBuilder().setId(String.valueOf(text.hashCode())).setText(text).build();
+            Document document = Document.newBuilder().setId(String.valueOf(text.hashCode())).setLabels(Arrays.asList(new String[]{text.length()%2==0?"A":"B"})).setText(text).build();
             learnerService.addDocument(document);
         }
 
-        String result = learnerService.train(new HashMap<>());
+        Map<String,String> parameters = ImmutableMap.of(
+                "topics","10",
+                "pos","NOUN VERB"
+//                "algorithm","llda"
+        );
+
+        String result = learnerService.train(parameters);
 
         LOG.info("Result: " + result);
 
         LOG.info("Waiting for finish");
-        Thread.sleep(10000);
+        Thread.sleep(1000000);
 
         List<Dimension> topics = modelerService.dimensions();
 

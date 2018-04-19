@@ -47,6 +47,8 @@ public class LabeledLDALauncher {
         int numTopics       = parameters.getNumTopics();
         Integer numTopWords = parameters.getNumTopWords();
         Integer numIterations = parameters.getNumIterations();
+        String pos          = parameters.getPos();
+        Integer maxRetries  = parameters.getNumRetries();
 
 
         LabeledLDA labeledLDA = new LabeledLDA(alpha, beta);
@@ -55,7 +57,7 @@ public class LabeledLDALauncher {
 
         Instant startProcess = Instant.now();
 
-        InstanceList instances = csvReader.getParallelInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),true);
+        InstanceList instances = csvReader.getParallelInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),true,pos);
 
 
         LOG.info("Data loaded.");
@@ -87,7 +89,11 @@ public class LabeledLDALauncher {
         Integer intervalTopicDisplay = numIterations/2;
         labeledLDA.setTopicDisplay(intervalTopicDisplay, numTopWords);
         LOG.info("Interval Topic Display: " + intervalTopicDisplay);
-        //
+
+        Integer intervalTopicValidation = numIterations/2;
+        labeledLDA.setTopicValidation(intervalTopicValidation,10);
+        labeledLDA.maxRetries = maxRetries;
+        LOG.info("Interval Topic Validation: " + intervalTopicValidation);
 
         labeledLDA.setNumIterations(numIterations);
         LOG.info("Num Iterations: " + numIterations);
@@ -103,7 +109,9 @@ public class LabeledLDALauncher {
                 + (ChronoUnit.SECONDS.between(startModel, endModel) % 60) + "secs";
         LOG.info("Topic Model created in: " + durationModel);
 
-
+        LOG.info("Calculating logLikelihood...");
+        double loglikelihood = labeledLDA.modelLogLikelihood();
+        LOG.info("logLikelihood = " + loglikelihood);
 
         //
         ParallelTopicModel parallelModel = new ParallelTopicModel(labeledLDA.getTopicAlphabet(), alpha * (double)labeledLDA.numTopics, beta);
@@ -121,6 +129,7 @@ public class LabeledLDALauncher {
 
         parallelModel.topicAlphabet = labelAlphabet;
         parallelModel.buildInitialTypeTopicCounts();
+
 
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), parameters, parallelModel, numTopWords);

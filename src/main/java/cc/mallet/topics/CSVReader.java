@@ -44,9 +44,9 @@ public class CSVReader {
 
 
 
-    public InstanceList getSerialInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget) throws IOException {
+    public InstanceList getSerialInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos) throws IOException {
 
-        Pipe pipe = new PipeBuilder().build(client, language, enableTarget);
+        Pipe pipe = new PipeBuilder().build(client, language, pos, enableTarget);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
@@ -66,10 +66,10 @@ public class CSVReader {
         return instances;
     }
 
-    public InstanceList getParallelInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget) throws IOException {
+    public InstanceList getParallelInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos) throws IOException {
 
 
-        Pipe pipe = new PipeBuilder().build(client, language, enableTarget);
+        Pipe pipe = new PipeBuilder().build(client, language, pos, enableTarget);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
