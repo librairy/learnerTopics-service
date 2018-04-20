@@ -82,14 +82,15 @@ public class CSVReader {
 
         ParallelExecutor executors = new ParallelExecutor();
 
+        LOG.info("processing documents ..");
         AtomicInteger counter = new AtomicInteger();
         while(iterator.hasNext()){
 
             try{
                 final Instance rawInstance = iterator.next();
+                if (counter.incrementAndGet() % 100 == 0) LOG.info(counter.get() + " docs processed");
                 executors.submit(() -> {
                     try{
-                        LOG.info("processing document: " + counter.incrementAndGet());
                         instances.addThruPipe(rawInstance);
                     }catch (Exception e){
                         LOG.warn("Instance not handled by pipe",e);

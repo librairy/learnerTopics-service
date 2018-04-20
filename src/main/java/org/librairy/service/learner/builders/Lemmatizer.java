@@ -76,7 +76,7 @@ public class Lemmatizer extends Pipe implements Serializable {
 
         String description = text.length() > 25? new String(text.substring(0,25)) : text;
 
-        LOG.info("retrieving lemmas for text: '" + description + "' ..");
+        LOG.debug("retrieving lemmas for text: '" + description + "' ..");
 
         String tokens = client.lemmatize(carrier.getData().toString(), language, this.pos);
         carrier.setData(tokens);

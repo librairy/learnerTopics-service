@@ -83,7 +83,7 @@ public class LabeledLDALauncher {
         int availableProcessors = Runtime.getRuntime().availableProcessors();
         int parallelThreads = (availableProcessors > 1) && (size/availableProcessors >= 100)? availableProcessors -1: 1;
         LOG.info("Parallel model to: " + parallelThreads + " threads");
-        //labeledLDA.setNumThreads(parallelThreads);
+//        labeledLDA.setNumThreads(parallelThreads);
 
         //
         Integer intervalTopicDisplay = numIterations/2;
