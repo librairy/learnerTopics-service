@@ -19,19 +19,20 @@ public class ModelFactory {
     LabeledLDALauncher lldaLauncher;
 
 
-    public void train(Map<String,String> parameters, LDAParameters ldaParameters) throws IOException {
+    public void train(Map<String,String> parameters, ModelParams ldaParameters) throws IOException {
 
+        String email = parameters.get("email");
 
         if (!parameters.containsKey("algorithm")){
-            ldaLauncher.train(ldaParameters);
+            ldaLauncher.train(ldaParameters, email);
         }else{
 
             switch (parameters.get("algorithm").toLowerCase()){
                 case "lda":
-                    ldaLauncher.train(ldaParameters);
+                    ldaLauncher.train(ldaParameters,email);
                     break;
                 case "llda":
-                    lldaLauncher.train(ldaParameters);
+                    lldaLauncher.train(ldaParameters,email);
                     break;
                 default:
                     new RuntimeException("No algorithm found by parameter 'algorithm' = " + parameters.get("algorithm"));

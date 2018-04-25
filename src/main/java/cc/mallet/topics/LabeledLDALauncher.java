@@ -4,6 +4,7 @@ import cc.mallet.types.FeatureSequence;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import cc.mallet.types.LabelAlphabet;
+import org.librairy.service.learner.builders.MailBuilder;
 import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +34,14 @@ public class LabeledLDALauncher {
     @Autowired
     TopicsService topicsService;
 
+    @Autowired
+    MailBuilder mailBuilder;
+
     public void setCsvReader(CSVReader csvReader) {
         this.csvReader = csvReader;
     }
 
-    public void train(LDAParameters parameters) throws IOException {
+    public void train(ModelParams parameters, String email) throws IOException {
 
         File outputDirFile = Paths.get(parameters.getOutputDir()).toFile();
         if (!outputDirFile.exists()) outputDirFile.mkdirs();
@@ -132,13 +136,9 @@ public class LabeledLDALauncher {
 
 
         LOG.info("saving model to disk .. ");
-        modelLauncher.saveModel(parameters.getOutputDir(), parameters, parallelModel, numTopWords);
+        modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords);
 
-        try {
-            topicsService.loadModel();
-        } catch (Exception e) {
-            LOG.error("Error loading the new model",e);
-        }
+        mailBuilder.newMailTo(email);
 
     }
 }

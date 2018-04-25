@@ -1,6 +1,7 @@
 package cc.mallet.topics;
 
 import cc.mallet.types.InstanceList;
+import org.librairy.service.learner.builders.MailBuilder;
 import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,11 +31,14 @@ public class LDALauncher {
     @Autowired
     TopicsService topicsService;
 
+    @Autowired
+    MailBuilder mailBuilder;
+
     public void setCsvReader(CSVReader csvReader) {
         this.csvReader = csvReader;
     }
 
-    public void train(LDAParameters parameters) throws IOException {
+    public void train(ModelParams parameters, String email) throws IOException {
 
         File outputDirFile = Paths.get(parameters.getOutputDir()).toFile();
         if (!outputDirFile.exists()) outputDirFile.mkdirs();
@@ -114,63 +118,17 @@ public class LDALauncher {
         Instant startModel = Instant.now();
         model.estimate();
 
-        // Show the words and topics in the first instance
-
-        // The data alphabet maps word IDs to strings
-//        Alphabet dataAlphabet = instances.getDataAlphabet();
-//
-//        FeatureSequence tokens = (FeatureSequence) model.getData().get(0).instance.getData();
-//        LabelSequence topics = model.getData().get(0).topicSequence;
-
-//        Formatter out = new Formatter(new StringBuilder(), Locale.US);
-//        for (int position = 0; position < tokens.getLength(); position++) {
-//            out.format("%s-%d ", dataAlphabet.lookupObject(tokens.getIndexAtPosition(position)), topics.getIndexAtPosition(position));
-//        }
-//        System.out.println(out);
-
-
-//        // Estimate the topic distribution of the first instance,
-//        //  given the current Gibbs state.
-//        double[] topicDistribution = model.getTopicProbabilities(0);
-//
-//        // Get an array of sorted sets of word ID/count pairs
-//        ArrayList<TreeSet<IDSorter>> topicSortedWords = model.getSortedWords();
-//
-//
-//        // Show top 5 words in topics with proportions for the first document
-//        for (int topic = 0; topic < numTopics; topic++) {
-//            Iterator<IDSorter> iterator = topicSortedWords.get(topic).iterator();
-//
-//            out = new Formatter(new StringBuilder(), Locale.US);
-//            out.format("%d\t%.3f\t", topic, topicDistribution[topic]);
-//            int rank = 0;
-//            while (iterator.hasNext() && rank < 5) {
-//                IDSorter idCountPair = iterator.next();
-//                out.format("%s (%.0f) ", dataAlphabet.lookupObject(idCountPair.getID()), idCountPair.getWeight());
-//                rank++;
-//            }
-//            System.out.println(out);
-//        }
-
         Instant endModel = Instant.now();
         String durationModel = ChronoUnit.HOURS.between(startModel, endModel) + "hours "
                 + ChronoUnit.MINUTES.between(startModel, endModel) % 60 + "min "
                 + (ChronoUnit.SECONDS.between(startModel, endModel) % 60) + "secs";
         LOG.info("Topic Model created in: " + durationModel);
 
-        LOG.info("Calculating logLikelihood...");
-        double loglikelihood = model.modelLogLikelihood();
-        LOG.info("logLikelihood = " + loglikelihood);
-
-
         LOG.info("saving model to disk .. ");
-        modelLauncher.saveModel(parameters.getOutputDir(), parameters, model, numTopWords);
+        modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords);
 
-        try {
-            topicsService.loadModel();
-        } catch (Exception e) {
-            LOG.error("Error loading the new model",e);
-        }
+        mailBuilder.newMailTo(email);
+
     }
 
 

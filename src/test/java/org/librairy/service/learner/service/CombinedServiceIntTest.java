@@ -71,8 +71,8 @@ public class CombinedServiceIntTest {
 
         Map<String,String> parameters = ImmutableMap.of(
                 "topics","10",
-                "pos","NOUN VERB"
-//                "algorithm","llda"
+                "pos","NOUN VERB",
+                "email","cbadenes@fi.upm.es"
         );
 
         String result = learnerService.train(parameters);
@@ -80,7 +80,7 @@ public class CombinedServiceIntTest {
         LOG.info("Result: " + result);
 
         LOG.info("Waiting for finish");
-        Thread.sleep(1000000);
+        Thread.sleep(10000);
 
         List<Dimension> topics = modelerService.dimensions();
 

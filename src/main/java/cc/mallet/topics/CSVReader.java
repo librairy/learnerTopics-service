@@ -82,7 +82,7 @@ public class CSVReader {
 
         ParallelExecutor executors = new ParallelExecutor();
 
-        LOG.info("processing documents ..");
+        LOG.info("processing documents in a parallel pipe builder ..");
         AtomicInteger counter = new AtomicInteger();
         while(iterator.hasNext()){
 

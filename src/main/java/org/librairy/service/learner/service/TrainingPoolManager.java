@@ -1,8 +1,7 @@
 package org.librairy.service.learner.service;
 
-import cc.mallet.topics.LDALauncher;
-import cc.mallet.topics.LDAParameters;
 import cc.mallet.topics.ModelFactory;
+import cc.mallet.topics.ModelParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,10 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -54,7 +51,7 @@ public class TrainingPoolManager {
             isTraining = true;
 
             try {
-                LDAParameters ldaParameters = new LDAParameters(corpusService.getFilePath().toFile().getAbsolutePath(), resourceFolder);
+                ModelParams ldaParameters = new ModelParams(corpusService.getFilePath().toFile().getAbsolutePath(), resourceFolder);
 
                 if (parameters.containsKey("alpha"))        ldaParameters.setAlpha(Double.valueOf(parameters.get("alpha")));
                 if (parameters.containsKey("beta"))         ldaParameters.setBeta(Double.valueOf(parameters.get("beta")));
@@ -63,6 +60,7 @@ public class TrainingPoolManager {
                 if (parameters.containsKey("language"))     ldaParameters.setLanguage(parameters.get("language"));
                 if (parameters.containsKey("pos"))          ldaParameters.setPos(parameters.get("pos"));
                 if (parameters.containsKey("retries"))      ldaParameters.setNumRetries(Integer.valueOf(parameters.get("retries")));
+                if (parameters.containsKey("topwords"))     ldaParameters.setNumTopWords(Integer.valueOf(parameters.get("topwords")));
 
                 modelFactory.train(parameters,ldaParameters);
             } catch (IOException e) {
