@@ -72,6 +72,7 @@ public class CombinedServiceIntTest {
         Map<String,String> parameters = ImmutableMap.of(
                 "topics","10",
                 "pos","NOUN VERB",
+                "algorithm","llda",
                 "email","cbadenes@fi.upm.es"
         );
 
