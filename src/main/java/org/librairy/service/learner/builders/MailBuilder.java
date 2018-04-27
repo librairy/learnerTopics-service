@@ -59,26 +59,25 @@ public class MailBuilder {
             message.addHeader("Content-type", "text/HTML; charset=UTF-8");
             message.addHeader("format", "flowed");
             message.addHeader("Content-Transfer-Encoding", "8bit");
-            message.setFrom(new InternetAddress("no_reply@librairy.org","NoReply-librAIry"));
+            message.setFrom(new InternetAddress("no_reply@librairy.org","librAIry"));
             message.setReplyTo(InternetAddress.parse("no_reply@librairy.org", false));
 
-            message.setSubject("[librAIry] Model Created");
+            message.setSubject("Your Topic Model is ready!");
 
             StringBuilder description = new StringBuilder();
-            description.append("Your Topic Model is ready!\n\n");
             description.append("# Topics \n");
             topicsService.getTopics().forEach(topic -> {
                 description.append("- '"+topic.getName()+"': {"+topic.getDescription()+"}\n");
             });
 
             Model model = topicsService.getModel();
-            description.append("# Params \n");
+            description.append("\n# Params \n");
             description.append("- algorithm: ").append(model.getAlgorithm()).append("\n");
             model.getParams().entrySet().stream().forEach(entry -> {
                 description.append("- ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
             });
 
-            description.append("# Stats \n");
+            description.append("\n# Stats \n");
             model.getStats().entrySet().stream().forEach(entry -> {
                 description.append("- ").append(entry.getKey()).append(": ").append(entry.getValue()).append("\n");
             });
@@ -91,7 +90,7 @@ public class MailBuilder {
             Transport.send(message);
 
 
-            System.out.println("Mail sent!");
+            LOG.info("Mail sent!");
 
         } catch (Exception e) {
             LOG.warn("Mail error",e);
