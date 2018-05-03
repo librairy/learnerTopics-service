@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class LearnerServiceImpl implements LearnerService {
@@ -55,6 +56,7 @@ public class LearnerServiceImpl implements LearnerService {
     @Override
     public String addDocument(Document document) throws AvroRemoteException {
         try {
+            document.setLabels(document.getLabels().stream().map(label -> label.replace(" ","_")).collect(Collectors.toList()));
             corpusService.add(document);
         } catch (IOException e) {
             throw new AvroRemoteException("IO Error",e);

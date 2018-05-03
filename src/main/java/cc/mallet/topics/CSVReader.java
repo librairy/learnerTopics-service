@@ -88,7 +88,10 @@ public class CSVReader {
 
             try{
                 final Instance rawInstance = iterator.next();
-                if (counter.incrementAndGet() % 100 == 0) LOG.info(counter.get() + " docs processed");
+                if (counter.incrementAndGet() % 100 == 0) {
+                    LOG.info(counter.get() + " docs processed");
+                    Thread.sleep(20);
+                }
                 executors.submit(() -> {
                     try{
                         instances.addThruPipe(rawInstance);

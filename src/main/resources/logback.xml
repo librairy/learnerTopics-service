@@ -12,7 +12,7 @@
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
         <encoder>
-            <pattern>%d{yyyyMMdd-HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n</pattern>
+            <pattern>%d [%thread] %highlight(%-5level) %cyan(%logger{15}) - %msg %n</pattern>
         </encoder>
         <append>false</append>
     </appender>
