@@ -14,7 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
@@ -76,7 +79,7 @@ public class CSVReader {
         int targetGroup         = labelIndex;
         int uriGroup            = idIndex;
 
-        BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath))));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath)), "UTF-8"));
 
         CsvIterator iterator = new CsvIterator(reader, regEx, dataGroup, targetGroup, uriGroup);
 
@@ -93,10 +96,22 @@ public class CSVReader {
                     Thread.sleep(20);
                 }
                 executors.submit(() -> {
-                    try{
+                    try {
+
+                            Object target = rawInstance.getTarget();
+
+                            if ((target != null) && (((String) target).length()>200)) {
+                                LOG.warn("Discarded doc label: '" + (String) target + "'");
+                                return;
+                            }
+
                         instances.addThruPipe(rawInstance);
+                    }catch (NumberFormatException e){
+                        LOG.warn("Instance not handled by pipe: " + e.getMessage());
+                        instances.remove(rawInstance);
                     }catch (Exception e){
-                        LOG.warn("Instance not handled by pipe",e);
+                        LOG.error("Instance not handled by pipe",e);
+                        instances.remove(rawInstance);
                     }
                 });
             }catch (Exception e){
