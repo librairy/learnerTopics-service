@@ -69,9 +69,7 @@ public class LDALauncher {
         //  the second is the parameter for a single dimension of the Dirichlet prior.
         ParallelTopicModel model = new ParallelTopicModel(numTopics, numTopics*alpha, beta);
 
-
-
-
+        parameters.getStopwords().forEach(word -> model.addStop(word));
 
         model.addInstances(instances);
 
@@ -88,7 +86,6 @@ public class LDALauncher {
         int parallelThreads = (availableProcessors > 1) && (size/availableProcessors >= 100)? availableProcessors -1: 1;
         LOG.info("Parallel model to: " + parallelThreads + " threads");
         model.setNumThreads(parallelThreads);
-
 
 
         // Disable print loglikelihood. (use for testing purposes)

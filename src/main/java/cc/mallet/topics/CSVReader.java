@@ -4,6 +4,8 @@ import cc.mallet.pipe.Pipe;
 import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
+import com.google.common.base.CharMatcher;
+import jdk.nashorn.internal.runtime.regexp.joni.Regex;
 import org.librairy.service.learner.builders.PipeBuilder;
 import org.librairy.service.learner.executors.ParallelExecutor;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
@@ -18,8 +20,11 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -98,12 +103,17 @@ public class CSVReader {
                 executors.submit(() -> {
                     try {
 
-                            Object target = rawInstance.getTarget();
+                        Object target = rawInstance.getTarget();
 
-                            if ((target != null) && (((String) target).length()>200)) {
-                                LOG.warn("Discarded doc label: '" + (String) target + "'");
-                                return;
-                            }
+                        String[] labels = (target != null) ? ((String) target).split(" ") : new String[0];
+                        Pattern pattern = Pattern.compile("[A-Za-z0-9-.@_~#áéíóúÁÉÍÓÚ]+");
+
+                        long nonValid = Arrays.stream(labels).filter(label -> !pattern.matcher(label).matches()).count();
+
+                        if (nonValid > 0){
+                            LOG.warn("Discarded doc label by RegEx: '" + labels[0] + "'");
+                            return;
+                        }
 
                         instances.addThruPipe(rawInstance);
                     }catch (NumberFormatException e){

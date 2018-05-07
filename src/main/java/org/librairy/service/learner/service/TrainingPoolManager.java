@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -61,6 +62,8 @@ public class TrainingPoolManager {
                 if (parameters.containsKey("pos"))          ldaParameters.setPos(parameters.get("pos"));
                 if (parameters.containsKey("retries"))      ldaParameters.setNumRetries(Integer.valueOf(parameters.get("retries")));
                 if (parameters.containsKey("topwords"))     ldaParameters.setNumTopWords(Integer.valueOf(parameters.get("topwords")));
+                if (parameters.containsKey("stopwords"))    ldaParameters.setStopwords(Arrays.asList(parameters.get("stopwords").split(" ")));
+
 
                 modelFactory.train(parameters,ldaParameters);
             } catch (IOException e) {

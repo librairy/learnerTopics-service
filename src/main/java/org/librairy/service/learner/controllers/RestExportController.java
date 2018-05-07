@@ -202,6 +202,8 @@ public class RestExportController {
 
             final AtomicReference<String> imageIdFromMessage = new AtomicReference<>();
 
+            dockerClient.pull("librairy/modeler-topics-service");
+
             final String returnedImageId = dockerClient.build(
                     Paths.get(resourceFolder).getParent(), imageName, new ProgressHandler() {
                         @Override

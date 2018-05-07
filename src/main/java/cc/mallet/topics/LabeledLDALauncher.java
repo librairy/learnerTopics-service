@@ -48,7 +48,6 @@ public class LabeledLDALauncher {
 
         Double alpha        = parameters.getAlpha();
         Double beta         = parameters.getBeta();
-        int numTopics       = parameters.getNumTopics();
         Integer numTopWords = parameters.getNumTopWords();
         Integer numIterations = parameters.getNumIterations();
         String pos          = parameters.getPos();
@@ -56,6 +55,8 @@ public class LabeledLDALauncher {
 
 
         LabeledLDA labeledLDA = new LabeledLDA(alpha, beta);
+
+        parameters.getStopwords().forEach(word -> labeledLDA.addStop(word));
 
         //labeledLDA.setRandomSeed(100);
 
