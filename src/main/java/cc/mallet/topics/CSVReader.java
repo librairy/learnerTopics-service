@@ -103,17 +103,6 @@ public class CSVReader {
                 executors.submit(() -> {
                     try {
 
-                        Pattern labelPattern = Pattern.compile("[A-Za-z0-9-.@_~#áéíóúÁÉÍÓÚñÑ]+");
-                        Object target = rawInstance.getTarget();
-                        Boolean invalid = false;
-                        if (target != null) {
-                            String[] labels = ((String) target).split(" ");
-                            invalid = Arrays.stream(labels).filter(label -> !labelPattern.matcher(label).matches()).count() > 0;
-                            if (invalid){
-                                System.out.println("hi");
-                            }
-                        }
-
                         instances.addThruPipe(rawInstance);
                     }catch (NumberFormatException e){
                         LOG.warn("Instance not handled by pipe: " + e.getMessage());
