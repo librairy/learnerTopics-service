@@ -124,7 +124,7 @@ public class LabeledLDALauncher {
         parallelModel.alphabet = labeledLDA.alphabet;
         parallelModel.numTypes = labeledLDA.numTypes;
         parallelModel.betaSum = labeledLDA.betaSum;
-
+        parallelModel.stoplist = labeledLDA.stoplist;
 
         LabelAlphabet labelAlphabet = new LabelAlphabet();
         for(int i=0; i<labeledLDA.labelAlphabet.size();i++){
