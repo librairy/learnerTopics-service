@@ -38,7 +38,7 @@ public class RestDocumentsController {
 
     @PostConstruct
     public void setup(){
-        labelPattern = Pattern.compile("[A-Za-z0-9-.@_~#áéíóúÁÉÍÓÚ]+");
+        labelPattern = Pattern.compile("[A-Za-z0-9-.@_~#áéíóúÁÉÍÓÚñÑ]+");
     }
 
     @PreDestroy

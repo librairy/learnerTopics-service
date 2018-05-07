@@ -27,7 +27,7 @@
     <logger name="cc.mallet.topics" level="INFO"/>
     <logger name="cc.mallet.topics.ParallelTopicModel" level="INFO"/>
 
-    <root level="ERROR">
+    <root level="WARN">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="FILE" />
     </root>

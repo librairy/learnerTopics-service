@@ -103,18 +103,6 @@ public class CSVReader {
                 executors.submit(() -> {
                     try {
 
-                        Object target = rawInstance.getTarget();
-
-                        String[] labels = (target != null) ? ((String) target).split(" ") : new String[0];
-                        Pattern pattern = Pattern.compile("[A-Za-z0-9-.@_~#áéíóúÁÉÍÓÚ]+");
-
-                        long nonValid = Arrays.stream(labels).filter(label -> !pattern.matcher(label).matches()).count();
-
-                        if (nonValid > 0){
-                            LOG.warn("Discarded doc label by RegEx: '" + labels[0] + "'");
-                            return;
-                        }
-
                         instances.addThruPipe(rawInstance);
                     }catch (NumberFormatException e){
                         LOG.warn("Instance not handled by pipe: " + e.getMessage());
