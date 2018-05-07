@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -120,17 +121,24 @@ public class LabeledLDALauncher {
 
         //
         ParallelTopicModel parallelModel = new ParallelTopicModel(labeledLDA.getTopicAlphabet(), alpha * (double)labeledLDA.numTopics, beta);
-        parallelModel.data = labeledLDA.data;
-        parallelModel.alphabet = labeledLDA.alphabet;
-        parallelModel.numTypes = labeledLDA.numTypes;
-        parallelModel.betaSum = labeledLDA.betaSum;
-        parallelModel.stoplist = labeledLDA.stoplist;
+        parallelModel.data                  = labeledLDA.data;
+        parallelModel.alphabet              = labeledLDA.alphabet;
+        parallelModel.numTypes              = labeledLDA.numTypes;
+        parallelModel.betaSum               = labeledLDA.betaSum;
+        parallelModel.stoplist              = labeledLDA.stoplist;
+        parallelModel.tokensPerTopic        = labeledLDA.tokensPerTopic;
+        parallelModel.typeTopicCounts       = labeledLDA.typeTopicCounts;
+        parallelModel.maxRetries            = labeledLDA.maxRetries;
+        parallelModel.numIterations         = labeledLDA.numIterations;
+        parallelModel.numTopics             = labeledLDA.numTopics;
+        parallelModel.showTopicsInterval    = labeledLDA.showTopicsInterval;
+        parallelModel.wordsPerTopic         = labeledLDA.wordsPerTopic;
+        parallelModel.validateTopicsInterval         = labeledLDA.validateTopicsInterval;
 
         LabelAlphabet labelAlphabet = new LabelAlphabet();
         for(int i=0; i<labeledLDA.labelAlphabet.size();i++){
             labelAlphabet.lookupIndex(labeledLDA.labelAlphabet.lookupObject(i),true);
         }
-
 
         parallelModel.topicAlphabet = labelAlphabet;
         parallelModel.buildInitialTypeTopicCounts();

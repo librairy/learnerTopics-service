@@ -1,5 +1,6 @@
 package org.librairy.service.learner.controllers;
 
+import com.google.common.base.Strings;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -58,6 +59,11 @@ public class RestDocumentsController {
             if (document.getLabels().stream().filter(label -> !labelPattern.matcher(label).matches()).count() > 0) {
                 LOG.warn("Invalid label values: " + document.getLabels());
                 return new ResponseEntity(new Result("invalid label values. It should be:  " + labelPattern.pattern()),HttpStatus.BAD_REQUEST);
+            }
+
+            if (Strings.isNullOrEmpty(document.getText())){
+                LOG.warn("Empty text: " + document.getId());
+                return new ResponseEntity(new Result("empty text"),HttpStatus.BAD_REQUEST);
             }
 
             String result = service.addDocument(document);
