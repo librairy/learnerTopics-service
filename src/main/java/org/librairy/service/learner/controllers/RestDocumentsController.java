@@ -21,7 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.regex.Pattern;
 
 @RestController
 @RequestMapping("/documents")
@@ -32,10 +34,11 @@ public class RestDocumentsController {
 
     @Autowired
     LearnerService service;
+    private Pattern labelPattern;
 
     @PostConstruct
     public void setup(){
-
+        labelPattern = Pattern.compile("[A-Za-z0-9-.@_~#áéíóúÁÉÍÓÚ]+");
     }
 
     @PreDestroy
@@ -51,6 +54,12 @@ public class RestDocumentsController {
     public ResponseEntity<Result> add(@RequestBody Document document)  {
         try {
             if (document.getLabels() == null) document.setLabels(Collections.emptyList());
+
+            if (document.getLabels().stream().filter(label -> !labelPattern.matcher(label).matches()).count() > 0) {
+                LOG.warn("Invalid label values: " + document.getLabels());
+                return new ResponseEntity(new Result("invalid label values. It should be:  " + labelPattern.pattern()),HttpStatus.BAD_REQUEST);
+            }
+
             String result = service.addDocument(document);
             return new ResponseEntity(new Result(result), HttpStatus.CREATED);
         } catch (AvroRemoteException e) {
