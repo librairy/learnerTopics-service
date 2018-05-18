@@ -103,6 +103,19 @@ public class CSVReader {
                 executors.submit(() -> {
                     try {
 
+
+                        Object target = rawInstance.getTarget();
+
+                        if (target != null){
+                            Pattern pattern = Pattern.compile("[A-Za-z0-9-.@_~#áéíóúÁÉÍÓÚñÑ]+");
+                            String[] labels = ((String) target).split(" ");
+                            long invalidLabels = Arrays.stream(labels).filter(label -> !pattern.matcher(label).matches()).count();
+                            if (invalidLabels > 0){
+                                LOG.warn("Discarded doc by invalid label: " + labels[0]);
+                                return;
+                            }
+                        }
+
                         instances.addThruPipe(rawInstance);
                     }catch (NumberFormatException e){
                         LOG.warn("Instance not handled by pipe: " + e.getMessage());

@@ -27,11 +27,10 @@ public class PipeBuilder {
         ArrayList pipeList = new ArrayList();
 
         // Read data from File objects
-
         pipeList.add(new Input2CharSequence("UTF-8"));
 
-        List<PoS> posList = Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE});
 
+        List<PoS> posList = Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE});
         if (!Strings.isNullOrEmpty(pos)){
             try{
                 posList = Arrays.asList(pos.split(" ")).stream().map(i -> PoS.valueOf(i.toUpperCase())).collect(Collectors.toList());
@@ -39,9 +38,7 @@ public class PipeBuilder {
                 LOG.warn("Invalid PoS values: " + pos);
             }
         }
-
         LOG.info("PoS: " + posList);
-
         pipeList.add(new Lemmatizer(client, language, posList));
 
         // Regular expression for what constitutes a token.
@@ -51,17 +48,14 @@ public class PipeBuilder {
         //    "\\w+"    ( A-Z, a-z, 0-9, _ )
         //    "[\\p{L}\\p{N}_]+|[\\p{P}]+"   (a group of only letters and numbers OR
         //                                    a group of only punctuation marks)
-        Pattern tokenPattern = Pattern.compile("[\\p{L}\\p{N}_]+");
-
-        // Tokenize raw strings
-        pipeList.add(new CharSequence2TokenSequence(tokenPattern));
+        pipeList.add(new CharSequence2TokenSequence(Pattern.compile("[\\p{L}\\p{N}_]+")));
 
 //        // Normalize all tokens to all lowercase
 //        pipeList.add(new TokenSequenceLowercase());
 
 //        // Remove stopwords from a standard English stoplist.
 //        //  options: [case sensitive] [mark deletions]
-        pipeList.add(new TokenSequenceRemoveStopwords(false, false));
+        //pipeList.add(new TokenSequenceRemoveStopwords(false, false));
 
         // Rather than storing tokens as strings, convert
         //  them to integers by looking them up in an alphabet.
@@ -78,8 +72,6 @@ public class PipeBuilder {
         // Now convert the sequence of features to a sparse vector,
         //  mapping feature IDs to counts.
 //        pipeList.add(new FeatureSequence2FeatureVector());
-
-
 
 
         // Print out the features and the label
