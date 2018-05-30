@@ -1,21 +1,34 @@
 package org.librairy.service.learner.service;
 
+import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.util.ErrorMessages_zh_CN;
+import com.optimaize.langdetect.LanguageDetector;
+import com.optimaize.langdetect.LanguageDetectorBuilder;
+import com.optimaize.langdetect.i18n.LdLocale;
+import com.optimaize.langdetect.ngram.NgramExtractors;
+import com.optimaize.langdetect.profiles.BuiltInLanguages;
+import com.optimaize.langdetect.profiles.LanguageProfile;
+import com.optimaize.langdetect.profiles.LanguageProfileReader;
+import com.optimaize.langdetect.text.CommonTextObjectFactories;
+import com.optimaize.langdetect.text.TextObject;
+import com.optimaize.langdetect.text.TextObjectFactory;
 import org.librairy.service.learner.facade.model.Document;
+import org.librairy.service.modeler.clients.LibrairyNlpClient;
+import org.librairy.service.nlp.facade.model.Token;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -32,6 +45,9 @@ public class CorpusService {
     @Value("#{environment['OUTPUT_DIR']?:'${output.dir}'}")
     String outputDir;
 
+    @Autowired
+    LibrairyNlpClient librairyNlpClient;
+
     public static final String SEPARATOR = ";;";
 
     private BufferedWriter writer;
@@ -39,7 +55,7 @@ public class CorpusService {
     private Boolean isClosed = false;
     private AtomicInteger counter   = new AtomicInteger(0);
     private String updated = "";
-
+    private String language = null;
 
 
     private final Escaper escaper = Escapers.builder()
@@ -50,10 +66,37 @@ public class CorpusService {
             .addEscape('\t'," ")
             .build();
 
+    private LanguageDetector languageDetector;
+    private TextObjectFactory textObjectFactory;
+
 
     @PostConstruct
     public void setup() throws IOException {
         initialize();
+        //load all languages:
+        LanguageProfileReader langReader = new LanguageProfileReader();
+
+        List<LanguageProfile> languageProfiles = new ArrayList<>();
+
+        Iterator it = BuiltInLanguages.getLanguages().iterator();
+
+        List<String> availableLangs = Arrays.asList(new String[]{"en","es","fr","de"});
+        while(it.hasNext()) {
+            LdLocale locale = (LdLocale)it.next();
+            if (availableLangs.contains(locale.getLanguage())) {
+                LOG.info("language added: " + locale);
+                languageProfiles.add(langReader.readBuiltIn(locale));
+            }
+        }
+
+
+        //build language detector:
+        this.languageDetector = LanguageDetectorBuilder.create(NgramExtractors.standard())
+                .withProfiles(languageProfiles)
+                .build();
+
+        //create a text object factory
+        this.textObjectFactory = CommonTextObjectFactories.forDetectingOnLargeText();
     }
 
     @PreDestroy
@@ -76,7 +119,12 @@ public class CorpusService {
         String labels = document.getLabels().stream().collect(Collectors.joining(" "));
         if (Strings.isNullOrEmpty(labels)) labels = "default";
         row.append(labels).append(SEPARATOR);
-        row.append(escaper.escape(document.getText()));
+        updateLanguage(document.getText());
+        // bow from nlp-service
+        List<Token> tokens = librairyNlpClient.bow(document.getText(), language, Collections.emptyList());
+        if (tokens.isEmpty()) return;
+        String text = tokens.stream().map(token -> escaper.escape(token.getLemma()) + "=" + token.getFreq() + "#" + token.getPos() + "#").collect(Collectors.joining(" "));
+        row.append(text);
         updated = TimeService.now();
         if (isClosed) initialize();
         writer.write(row.toString()+"\n");
@@ -101,17 +149,33 @@ public class CorpusService {
                 BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath.toFile()))));
                 counter.set(Long.valueOf(reader.lines().count()).intValue());
                 updated = TimeService.from(filePath.toFile().lastModified());
+                updateLanguage(reader.readLine());
                 reader.close();
             }catch (Exception e){
                 LOG.debug("Error reading lines in existing file: " + filePath,e);
             }
         }else{
             filePath.toFile().getParentFile().mkdirs();
+            language = null;
         }
 
         writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
         setClosed(false);
         LOG.info("corpus initialized");
+    }
+
+    private String updateLanguage(String text){
+        if (Strings.isNullOrEmpty(language)){
+            LOG.info("detecting language from text: " + text.substring(0, text.length()>50? 50 : text.length()));
+            TextObject textObject = textObjectFactory.forText(text);
+            Optional<LdLocale> lang = languageDetector.detect(textObject);
+            if (!lang.isPresent()){
+                LOG.warn("language not detected! english by default");
+                return "en";
+            }
+            language = lang.get().getLanguage();
+        }
+        return language;
     }
 
     public void close() throws IOException {

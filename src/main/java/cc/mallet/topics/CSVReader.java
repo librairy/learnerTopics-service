@@ -6,6 +6,7 @@ import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import com.google.common.base.CharMatcher;
 import jdk.nashorn.internal.runtime.regexp.joni.Regex;
+import org.librairy.service.learner.builders.BoWPipeBuilder;
 import org.librairy.service.learner.builders.PipeBuilder;
 import org.librairy.service.learner.executors.ParallelExecutor;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
@@ -54,7 +55,8 @@ public class CSVReader {
 
     public InstanceList getSerialInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos) throws IOException {
 
-        Pipe pipe = new PipeBuilder().build(client, language, pos, enableTarget);
+//        Pipe pipe = new PipeBuilder().build(client, language, pos, enableTarget);
+        Pipe pipe = new BoWPipeBuilder().build(pos, enableTarget);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
@@ -77,7 +79,8 @@ public class CSVReader {
     public InstanceList getParallelInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos) throws IOException {
 
 
-        Pipe pipe = new PipeBuilder().build(client, language, pos, enableTarget);
+        //Pipe pipe = new PipeBuilder().build(client, language, pos, enableTarget);
+        Pipe pipe = new BoWPipeBuilder().build(pos, enableTarget);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
@@ -90,7 +93,7 @@ public class CSVReader {
 
         ParallelExecutor executors = new ParallelExecutor();
 
-        LOG.info("processing documents in a parallel pipe builder ..");
+        LOG.info("processing documents in a parallel bow-pipe builder ..");
         AtomicInteger counter = new AtomicInteger();
         while(iterator.hasNext()){
 
@@ -102,10 +105,7 @@ public class CSVReader {
                 }
                 executors.submit(() -> {
                     try {
-
-
                         Object target = rawInstance.getTarget();
-
                         if (target != null){
                             Pattern pattern = Pattern.compile("[A-Za-z0-9-.@_~;#áéíóúÁÉÍÓÚñÑ]+");
                             String[] labels = ((String) target).split(" ");

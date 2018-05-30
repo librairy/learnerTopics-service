@@ -43,6 +43,7 @@
 	  <docker.version>8.7.1</docker.version>
 	  <joda.version>2.9.9</joda.version>
 	  <junit.version>4.12</junit.version>
+	  <language-detector.version>0.6</language-detector.version>
 	  <librairy.modeler.version>[0.1,)</librairy.modeler.version>
 	  <librairy.learner.version>[1.0,)</librairy.learner.version>
 	  <librairy.swagger.version>[0.3,)</librairy.swagger.version>
@@ -126,6 +127,13 @@
 				  <groupId>org.apache.velocity</groupId>
 				  <artifactId>velocity-tools</artifactId>
 				  <version>${velocity.tool.version}</version>
+			  </dependency>
+
+			  <!-- Language Detector -->
+			  <dependency>
+				  <groupId>com.optimaize.languagedetector</groupId>
+				  <artifactId>language-detector</artifactId>
+				  <version>${language-detector.version}</version>
 			  </dependency>
 
 			  <!-- Log Libraries -->
@@ -217,6 +225,12 @@
 		  <dependency>
 			  <groupId>com.mashape.unirest</groupId>
 			  <artifactId>unirest-java</artifactId>
+		  </dependency>
+
+		  <!-- Language Detector -->
+		  <dependency>
+			  <groupId>com.optimaize.languagedetector</groupId>
+			  <artifactId>language-detector</artifactId>
 		  </dependency>
 
 		  <!-- Docker Dependencies -->

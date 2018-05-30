@@ -1,6 +1,7 @@
 package org.librairy.service.learner.service;
 
 import org.apache.avro.AvroRemoteException;
+import org.librairy.service.learner.executors.ParallelExecutor;
 import org.librairy.service.learner.facade.model.Corpus;
 import org.librairy.service.learner.facade.model.Document;
 import org.librairy.service.learner.facade.model.LearnerService;
@@ -38,10 +39,9 @@ public class LearnerServiceImpl implements LearnerService {
     LibrairyNlpClient librairyNlpClient;
 
     @Autowired
-    InferencePoolManager inferencePoolManager;
-
-    @Autowired
     TrainingPoolManager trainingPoolManager;
+
+    private ParallelExecutor executor;
 
     @PostConstruct
     public void setup() throws IOException {
@@ -49,18 +49,23 @@ public class LearnerServiceImpl implements LearnerService {
         //// Load resources
         //model              = Paths.get(resourceFolder,"resource.bin").toFile().getAbsolutePath();
 
+        executor = new ParallelExecutor();
+
         LOG.info("Service initialized");
     }
 
 
     @Override
     public String addDocument(Document document) throws AvroRemoteException {
+
         try {
             document.setLabels(document.getLabels().stream().map(label -> label.replace(" ","_")).collect(Collectors.toList()));
             corpusService.add(document);
-        } catch (IOException e) {
-            throw new AvroRemoteException("IO Error",e);
+        } catch (Exception e) {
+            LOG.error("IO Error",e);
         }
+//        executor.submit(() -> {
+//        });
         return "document added";
     }
 

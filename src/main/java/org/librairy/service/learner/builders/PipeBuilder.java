@@ -55,7 +55,10 @@ public class PipeBuilder {
 
 //        // Remove stopwords from a standard English stoplist.
 //        //  options: [case sensitive] [mark deletions]
-        //pipeList.add(new TokenSequenceRemoveStopwords(false, false));
+        pipeList.add(new TokenSequenceRemoveStopwords(false, false));
+//
+//        // Remove tokens that contain non-alphabetic characters
+        pipeList.add(new TokenSequenceRemoveNonAlpha(false));
 
         // Rather than storing tokens as strings, convert
         //  them to integers by looking them up in an alphabet.
@@ -100,6 +103,16 @@ public class PipeBuilder {
 
         // Tokenize raw strings
         pipeList.add(new CharSequence2TokenSequence(tokenPattern));
+
+//        pipeList.add(new TokenSequenceRemoveStopwords(false, false));
+//
+//        // Remove tokens that contain non-alphabetic characters
+//        pipeList.add(new TokenSequenceRemoveNonAlpha(false));
+
+        // Rather than storing tokens as strings, convert
+        //  them to integers by looking them up in an alphabet.
+        pipeList.add(new TokenSequence2FeatureSequence());
+
         // Print out the features and the label
 //        pipeList.add(new PrintInputAndTarget());
 
