@@ -27,6 +27,9 @@ public class LearnerServiceImpl implements LearnerService {
     @Value("#{environment['RESOURCE_FOLDER']?:'${resource.folder}'}")
     String resourceFolder;
 
+    @Value("#{environment['ENABLE_MULTIGRAMS']?:${enable.multigrams}}")
+    Boolean enableMultigrams;
+
     String model              ;
 
     @Autowired
@@ -60,7 +63,7 @@ public class LearnerServiceImpl implements LearnerService {
 
         try {
             document.setLabels(document.getLabels().stream().map(label -> label.replace(" ","_")).collect(Collectors.toList()));
-            corpusService.add(document);
+            corpusService.add(document,enableMultigrams);
         } catch (Exception e) {
             LOG.error("IO Error",e);
         }

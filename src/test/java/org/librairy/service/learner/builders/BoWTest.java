@@ -62,7 +62,7 @@ public class BoWTest {
     @Test
     public void bow() throws IOException {
 
-        Pipe pipe = new BoWPipeBuilder().build("NOUN VERB", false);
+        Pipe pipe = new PipeBuilder().build("NOUN VERB", false);
         InstanceList instances = new InstanceList(pipe);
 
         String regEx            = "(.*);;(.*);;(.*);;(.*)";

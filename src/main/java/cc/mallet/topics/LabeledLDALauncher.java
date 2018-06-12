@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>

@@ -32,8 +32,7 @@ public class TokenSequenceExpandBoW extends Pipe implements Serializable
             String[] values = t.getText().split(nameValueSeparator);
             Integer times = Integer.valueOf(values[1]);
             for (int j=0;j<times;j++){
-                Token nt = new Token(values[0]);
-                nts.add(nt);
+                nts.add(new Token(values[0]));
             }
 
         }

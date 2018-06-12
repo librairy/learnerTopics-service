@@ -16,7 +16,9 @@ import com.optimaize.langdetect.text.TextObject;
 import com.optimaize.langdetect.text.TextObjectFactory;
 import org.librairy.service.learner.facade.model.Document;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
-import org.librairy.service.nlp.facade.model.Token;
+import org.librairy.service.modeler.service.BoWService;
+import org.librairy.service.nlp.facade.model.Group;
+import org.librairy.service.nlp.facade.model.PoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,10 @@ import javax.annotation.PreDestroy;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -112,7 +117,7 @@ public class CorpusService {
         return counter.get();
     }
 
-    public synchronized void add(Document document) throws IOException {
+    public synchronized void add(Document document, Boolean multigrams) throws IOException {
         StringBuilder row = new StringBuilder();
         row.append(document.getId()).append(SEPARATOR);
         row.append(escaper.escape(document.getName())).append(SEPARATOR);
@@ -121,9 +126,9 @@ public class CorpusService {
         row.append(labels).append(SEPARATOR);
         updateLanguage(document.getText());
         // bow from nlp-service
-        List<Token> tokens = librairyNlpClient.bow(document.getText(), language, Collections.emptyList());
-        if (tokens.isEmpty()) return;
-        String text = tokens.stream().map(token -> escaper.escape(token.getLemma()) + "=" + token.getFreq() + "#" + token.getPos() + "#").collect(Collectors.joining(" "));
+        List<Group> bows = librairyNlpClient.bow(document.getText(), language, Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE}), multigrams);
+        if (bows.isEmpty()) return;
+        String text = BoWService.toText(bows);
         row.append(text);
         updated = TimeService.now();
         if (isClosed) initialize();
@@ -169,6 +174,7 @@ public class CorpusService {
             LOG.info("detecting language from text: " + text.substring(0, text.length()>50? 50 : text.length()));
             TextObject textObject = textObjectFactory.forText(text);
             Optional<LdLocale> lang = languageDetector.detect(textObject);
+            LOG.info("Language=" + lang.get());
             if (!lang.isPresent()){
                 LOG.warn("language not detected! english by default");
                 return "en";

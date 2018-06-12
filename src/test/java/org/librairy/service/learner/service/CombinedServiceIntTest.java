@@ -64,13 +64,17 @@ public class CombinedServiceIntTest {
 
         learnerService.reset();
 
-        for (String text : texts){
+        texts.parallelStream().forEach( text -> {
             Document document = Document.newBuilder().setId(String.valueOf(text.hashCode())).setLabels(Arrays.asList(new String[]{text.length()%2==0?"A":"B"})).setText(text).build();
-            learnerService.addDocument(document);
-        }
+            try {
+                learnerService.addDocument(document);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
 
         Map<String,String> parameters = ImmutableMap.of(
-                "topics","10",
+                "topics","3",
                 "pos","NOUN VERB ADJECTIVE",
 //                "pos","",
                 "algorithm","lda"

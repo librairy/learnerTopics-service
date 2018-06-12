@@ -4,9 +4,6 @@ import cc.mallet.pipe.Pipe;
 import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
-import com.google.common.base.CharMatcher;
-import jdk.nashorn.internal.runtime.regexp.joni.Regex;
-import org.librairy.service.learner.builders.BoWPipeBuilder;
 import org.librairy.service.learner.builders.PipeBuilder;
 import org.librairy.service.learner.executors.ParallelExecutor;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
@@ -24,7 +21,6 @@ import java.io.InputStreamReader;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
@@ -55,8 +51,7 @@ public class CSVReader {
 
     public InstanceList getSerialInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos) throws IOException {
 
-//        Pipe pipe = new PipeBuilder().build(client, language, pos, enableTarget);
-        Pipe pipe = new BoWPipeBuilder().build(pos, enableTarget);
+        Pipe pipe = new PipeBuilder().build(pos, enableTarget);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
@@ -78,9 +73,7 @@ public class CSVReader {
 
     public InstanceList getParallelInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos) throws IOException {
 
-
-        //Pipe pipe = new PipeBuilder().build(client, language, pos, enableTarget);
-        Pipe pipe = new BoWPipeBuilder().build(pos, enableTarget);
+        Pipe pipe = new PipeBuilder().build(pos, enableTarget);
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
