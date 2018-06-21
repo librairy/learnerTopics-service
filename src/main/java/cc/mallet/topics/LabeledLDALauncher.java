@@ -4,8 +4,8 @@ import cc.mallet.types.FeatureSequence;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import cc.mallet.types.LabelAlphabet;
+import org.librairy.service.learner.builders.InstanceBuilder;
 import org.librairy.service.learner.builders.MailBuilder;
-import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,20 +26,13 @@ public class LabeledLDALauncher {
     private static final Logger LOG = LoggerFactory.getLogger(LabeledLDALauncher.class);
 
     @Autowired
-    CSVReader csvReader;
+    InstanceBuilder instanceBuilder;
 
     @Autowired
     ModelLauncher modelLauncher;
 
     @Autowired
-    TopicsService topicsService;
-
-    @Autowired
     MailBuilder mailBuilder;
-
-    public void setCsvReader(CSVReader csvReader) {
-        this.csvReader = csvReader;
-    }
 
     public void train(ModelParams parameters, String email) throws IOException {
 
@@ -62,8 +55,13 @@ public class LabeledLDALauncher {
 
         Instant startProcess = Instant.now();
 
-        InstanceList instances = csvReader.getParallelInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),true,pos);
+        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), true, pos, parameters.getMinFreq(), parameters.getMaxDocRatio());
 
+        int numWords = instances.getDataAlphabet().size();
+        if ( numWords <= 10){
+            LOG.warn("Not enough words ("+numWords+") to train a model. Task aborted");
+            return;
+        }
 
         LOG.info("Data loaded.");
         if(instances.size() > 0 && instances.get(0) != null) {

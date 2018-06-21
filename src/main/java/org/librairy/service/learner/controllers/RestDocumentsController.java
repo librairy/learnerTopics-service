@@ -15,10 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -52,7 +49,7 @@ public class RestDocumentsController {
             @ApiResponse(code = 201, message = "Created", response = String.class),
     })
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Result> add(@RequestBody Document document)  {
+    public ResponseEntity<Result> add(@RequestBody Document document, @RequestParam( defaultValue = "false") Boolean multigrams )  {
         try {
             if (document.getLabels() == null) document.setLabels(Collections.emptyList());
 
@@ -66,7 +63,7 @@ public class RestDocumentsController {
                 return new ResponseEntity(new Result("empty text"),HttpStatus.BAD_REQUEST);
             }
 
-            String result = service.addDocument(document);
+            String result = service.addDocument(document,multigrams);
             return new ResponseEntity(new Result(result), HttpStatus.CREATED);
         } catch (AvroRemoteException e) {
             return new ResponseEntity(new Result("internal service seems down"),HttpStatus.FAILED_DEPENDENCY);

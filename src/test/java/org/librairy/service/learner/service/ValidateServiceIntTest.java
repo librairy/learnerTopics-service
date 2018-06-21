@@ -86,7 +86,7 @@ public class ValidateServiceIntTest {
             document.setLabels(labels);
             document.setName(name);
 
-            ResponseEntity<Result> response = controller.add(document);
+            ResponseEntity<Result> response = controller.add(document,false);
             LOG.info("response: " +response);
 
         }

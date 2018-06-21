@@ -117,7 +117,7 @@ public class CorpusService {
         return counter.get();
     }
 
-    public synchronized void add(Document document, Boolean multigrams) throws IOException {
+    public void add(Document document, Boolean multigrams) throws IOException {
         StringBuilder row = new StringBuilder();
         row.append(document.getId()).append(SEPARATOR);
         row.append(escaper.escape(document.getName())).append(SEPARATOR);
@@ -132,10 +132,21 @@ public class CorpusService {
         row.append(text);
         updated = TimeService.now();
         if (isClosed) initialize();
-        writer.write(row.toString()+"\n");
+        write(row.toString()+"\n");
         counter.incrementAndGet();
         LOG.info("Added document: [" + document.getId() + " | " + document.getName() + "] to corpus");
     }
+
+    private synchronized void write(String text){
+        try {
+            writer.write(text);
+        } catch (IOException e) {
+            LOG.warn("Error writing on file: " + e.getMessage());
+        } catch (Exception e){
+            LOG.error("Unexpected Error writing on file: " + e.getMessage(),e);
+        }
+    }
+
 
     public void remove() throws IOException {
         LOG.info("Corpus deleted");

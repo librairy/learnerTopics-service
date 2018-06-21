@@ -65,9 +65,9 @@ public class CombinedServiceIntTest {
         learnerService.reset();
 
         texts.parallelStream().forEach( text -> {
-            Document document = Document.newBuilder().setId(String.valueOf(text.hashCode())).setLabels(Arrays.asList(new String[]{text.length()%2==0?"A":"B"})).setText(text).build();
+            Document document = Document.newBuilder().setId(String.valueOf(text.hashCode())).setName(String.valueOf(text.hashCode())).setLabels(Arrays.asList(new String[]{text.length()%2==0?"A":"B"})).setText(text).build();
             try {
-                learnerService.addDocument(document);
+                learnerService.addDocument(document,true);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -76,7 +76,8 @@ public class CombinedServiceIntTest {
         Map<String,String> parameters = ImmutableMap.of(
                 "topics","3",
                 "pos","NOUN VERB ADJECTIVE",
-//                "pos","",
+                "minfreq","1",
+                "maxdocratio","0.95",
                 "algorithm","lda"
         );
 
@@ -85,7 +86,12 @@ public class CombinedServiceIntTest {
         LOG.info("Result: " + result);
 
         LOG.info("Waiting for finish");
-        Thread.sleep(10000);
+        Boolean completed = false;
+
+        while(!completed){
+            Thread.sleep(1000);
+            completed = !modelerService.dimensions().isEmpty();
+        }
 
         List<Dimension> topics = modelerService.dimensions();
 

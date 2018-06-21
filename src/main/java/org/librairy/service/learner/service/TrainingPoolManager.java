@@ -63,6 +63,8 @@ public class TrainingPoolManager {
                 if (parameters.containsKey("retries"))      ldaParameters.setNumRetries(Integer.valueOf(parameters.get("retries")));
                 if (parameters.containsKey("topwords"))     ldaParameters.setNumTopWords(Integer.valueOf(parameters.get("topwords")));
                 if (parameters.containsKey("stopwords"))    ldaParameters.setStopwords(Arrays.asList(parameters.get("stopwords").split(" ")));
+                if (parameters.containsKey("minfreq"))      ldaParameters.setMinFreq(Integer.valueOf(parameters.get("minfreq")));
+                if (parameters.containsKey("maxdocratio"))  ldaParameters.setMaxDocRatio(Double.valueOf(parameters.get("maxdocratio")));
 
 
                 modelFactory.train(parameters,ldaParameters);

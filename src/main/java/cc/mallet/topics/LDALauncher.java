@@ -1,8 +1,8 @@
 package cc.mallet.topics;
 
 import cc.mallet.types.InstanceList;
+import org.librairy.service.learner.builders.InstanceBuilder;
 import org.librairy.service.learner.builders.MailBuilder;
-import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,20 +23,14 @@ public class LDALauncher {
     private static final Logger LOG = LoggerFactory.getLogger(LDALauncher.class);
 
     @Autowired
-    CSVReader csvReader;
+    InstanceBuilder instanceBuilder;
 
     @Autowired
     ModelLauncher modelLauncher;
 
     @Autowired
-    TopicsService topicsService;
-
-    @Autowired
     MailBuilder mailBuilder;
 
-    public void setCsvReader(CSVReader csvReader) {
-        this.csvReader = csvReader;
-    }
 
     public void train(ModelParams parameters, String email) throws IOException {
 
@@ -58,12 +52,14 @@ public class LDALauncher {
 
         Instant startProcess = Instant.now();
 
-        //InstanceList instances = csvReader.getSerialInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),false);
-        InstanceList instances = csvReader.getParallelInstances(parameters.getCorpusFile(), parameters.getLanguage(), parameters.getRegEx(),parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(),false, pos);
+        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), false, pos, parameters.getMinFreq(), parameters.getMaxDocRatio());
 
-        // Create a model with 100 topics, alpha_t = 0.01, beta_w = 0.01
-        //  Note that the first parameter is passed as the sum over topics, while
-        //  the second is the parameter for a single dimension of the Dirichlet prior.
+        int numWords = instances.getDataAlphabet().size();
+        if ( numWords <= 10){
+            LOG.warn("Not enough words ("+numWords+") to train a model. Task aborted");
+            return;
+        }
+
         ParallelTopicModel model = new ParallelTopicModel(numTopics, numTopics*alpha, beta);
 
         parameters.getStopwords().forEach(word -> model.addStop(word));

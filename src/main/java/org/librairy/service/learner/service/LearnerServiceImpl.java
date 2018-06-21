@@ -27,9 +27,6 @@ public class LearnerServiceImpl implements LearnerService {
     @Value("#{environment['RESOURCE_FOLDER']?:'${resource.folder}'}")
     String resourceFolder;
 
-    @Value("#{environment['ENABLE_MULTIGRAMS']?:${enable.multigrams}}")
-    Boolean enableMultigrams;
-
     String model              ;
 
     @Autowired
@@ -59,11 +56,11 @@ public class LearnerServiceImpl implements LearnerService {
 
 
     @Override
-    public String addDocument(Document document) throws AvroRemoteException {
+    public String addDocument(Document document, boolean multigrams) throws AvroRemoteException {
 
         try {
             document.setLabels(document.getLabels().stream().map(label -> label.replace(" ","_")).collect(Collectors.toList()));
-            corpusService.add(document,enableMultigrams);
+            corpusService.add(document,multigrams);
         } catch (Exception e) {
             LOG.error("IO Error",e);
         }

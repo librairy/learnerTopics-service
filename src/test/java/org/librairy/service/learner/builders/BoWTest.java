@@ -1,6 +1,8 @@
 package org.librairy.service.learner.builders;
 
 import cc.mallet.pipe.Pipe;
+import cc.mallet.pipe.SimpleTokenizer;
+import cc.mallet.pipe.TokenSequenceRemoveStopwords;
 import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.topics.ParallelTopicModel;
 import cc.mallet.types.Instance;
@@ -62,7 +64,7 @@ public class BoWTest {
     @Test
     public void bow() throws IOException {
 
-        Pipe pipe = new PipeBuilder().build("NOUN VERB", false);
+        Pipe pipe = new PipeBuilder().build("NOUN VERB", false, new TokenSequenceRemoveStopwords());
         InstanceList instances = new InstanceList(pipe);
 
         String regEx            = "(.*);;(.*);;(.*);;(.*)";

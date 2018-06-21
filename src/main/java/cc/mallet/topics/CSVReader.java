@@ -1,16 +1,15 @@
 package cc.mallet.topics;
 
 import cc.mallet.pipe.Pipe;
+import cc.mallet.pipe.SimpleTokenizer;
+import cc.mallet.pipe.TokenSequenceRemoveStopwords;
 import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import org.librairy.service.learner.builders.PipeBuilder;
 import org.librairy.service.learner.executors.ParallelExecutor;
-import org.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -32,26 +31,16 @@ public class CSVReader {
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVReader.class);
 
-    @Value("#{environment['NLP_ENDPOINT']?:'${nlp.endpoint}'}")
-    String nlpEndpoint;
-
-    @Autowired
-    LibrairyNlpClient client;
 
     @PostConstruct
     public void setup(){
         LOG.info("component initialized");
     }
 
-    public void setNlpEndpoint(String nlpEndpoint) {
-        this.nlpEndpoint = nlpEndpoint;
-    }
-
-
 
     public InstanceList getSerialInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos) throws IOException {
 
-        Pipe pipe = new PipeBuilder().build(pos, enableTarget);
+        Pipe pipe = new PipeBuilder().build(pos, enableTarget, new TokenSequenceRemoveStopwords(false, false));
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
@@ -73,7 +62,7 @@ public class CSVReader {
 
     public InstanceList getParallelInstances(String filePath, String language, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos) throws IOException {
 
-        Pipe pipe = new PipeBuilder().build(pos, enableTarget);
+        Pipe pipe = new PipeBuilder().build(pos, enableTarget, new TokenSequenceRemoveStopwords(false, false));
         InstanceList instances = new InstanceList(pipe);
 
         int dataGroup           = textIndex;
