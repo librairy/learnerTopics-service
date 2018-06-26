@@ -6,6 +6,8 @@ import cc.mallet.types.Token;
 import cc.mallet.types.TokenSequence;
 import org.apache.commons.lang.StringUtils;
 import org.librairy.service.nlp.facade.model.PoS;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ import java.util.List;
 
 public class TokenSequenceRemovePoS extends Pipe implements Serializable
 {
+    private static final Logger LOG = LoggerFactory.getLogger(TokenSequenceRemovePoS.class);
+
     boolean caseSensitive   = true;
     boolean markDeletions   = false;
     List<PoS> posList = new ArrayList();
@@ -65,12 +69,16 @@ public class TokenSequenceRemovePoS extends Pipe implements Serializable
         for (int i = 0; i < ts.size(); i++) {
             Token t = ts.get(i);
             String pos = StringUtils.substringBetween(t.getText(), "#", "#");
-            if (posList.isEmpty() || posList.contains(PoS.valueOf(pos.toUpperCase()))){
-                t.setText(StringUtils.substringBefore(t.getText(),"#"));
-                ret.add(t);
-                prevToken = t;
-            } else if (markDeletions && prevToken != null)
-                prevToken.setProperty (FeatureSequenceWithBigrams.deletionMark, StringUtils.substringBefore(t.getText(),"#"));
+            try{
+                if (posList.isEmpty() || posList.contains(PoS.valueOf(pos.toUpperCase()))){
+                    t.setText(StringUtils.substringBefore(t.getText(),"#"));
+                    ret.add(t);
+                    prevToken = t;
+                } else if (markDeletions && prevToken != null)
+                    prevToken.setProperty (FeatureSequenceWithBigrams.deletionMark, StringUtils.substringBefore(t.getText(),"#"));
+            }catch (Exception e){
+                LOG.error("Unexpected error trying to remove tokens from '" + t.getText() + "' : " + e.getMessage());
+            }
         }
         carrier.setData(ret);
         return carrier;

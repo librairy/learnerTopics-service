@@ -17,6 +17,8 @@ import java.io.Serializable;
 
 public class TokenSequenceExpandBoW extends Pipe implements Serializable
 {
+    private static final Logger LOG = LoggerFactory.getLogger(TokenSequenceExpandBoW.class);
+
     String nameValueSeparator; // what separates the name from the value? (CAN'T BE WHITESPACE!)
 
     public TokenSequenceExpandBoW (String _nameValueSeparator) {
@@ -26,16 +28,21 @@ public class TokenSequenceExpandBoW extends Pipe implements Serializable
     public Instance pipe (Instance carrier) {
         TokenSequence ts = (TokenSequence) carrier.getData ();
         TokenSequence nts = new TokenSequence();
-        int limit = ts.size();
-        for (int i=0; i < limit; i++) {
-            Token t = ts.get(i);
-            String[] values = t.getText().split(nameValueSeparator);
-            Integer times = Integer.valueOf(values[1]);
-            for (int j=0;j<times;j++){
-                nts.add(new Token(values[0]));
+            int limit = ts.size();
+            for (int i=0; i < limit; i++) {
+                Token t = ts.get(i);
+                try{
+                    String[] values = t.getText().split(nameValueSeparator);
+                    Integer times = Integer.valueOf(values[1]);
+                    for (int j=0;j<times;j++){
+                        nts.add(new Token(values[0]));
+                    }
+                }catch (Exception e){
+                    LOG.error("Unexpected error trying to expand BoW from '" + t.getText()+"' : " +e.getMessage());
+                }
+
             }
 
-        }
         carrier.setData (nts);
         return carrier;
     }
