@@ -118,6 +118,10 @@ public class CorpusService {
     }
 
     public void add(Document document, Boolean multigrams) throws IOException {
+        if (Strings.isNullOrEmpty(document.getText())) {
+            LOG.warn("Document is empty: " + document.getId());
+            return;
+        }
         StringBuilder row = new StringBuilder();
         row.append(document.getId()).append(SEPARATOR);
         row.append(escaper.escape(document.getName())).append(SEPARATOR);
