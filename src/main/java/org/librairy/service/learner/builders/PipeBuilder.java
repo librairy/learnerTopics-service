@@ -35,8 +35,6 @@ public class PipeBuilder {
 
         pipeList.add(new TokenSequenceExpandBoW("="));
 
-        pipeList.add(new TokenSequenceRemoveNonAlpha());
-
         pipeList.add(stopWordTokenizer);
 
         pipeList.add(new TokenSequence2FeatureSequence());
@@ -82,8 +80,6 @@ public class PipeBuilder {
         pipeList.add(new TokenSequenceRemovePoS(posList));
 
         pipeList.add(new TokenSequenceExpandBoW("="));
-
-        pipeList.add(new TokenSequenceRemoveNonAlpha());
 
         pipeList.add(stopWordTokenizer);
 
