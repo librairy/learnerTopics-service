@@ -24,11 +24,6 @@ public class LearnerServiceImpl implements LearnerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(LearnerServiceImpl.class);
 
-    @Value("#{environment['RESOURCE_FOLDER']?:'${resource.folder}'}")
-    String resourceFolder;
-
-    String model              ;
-
     @Autowired
     CorpusService corpusService;
 
@@ -41,15 +36,12 @@ public class LearnerServiceImpl implements LearnerService {
     @Autowired
     TrainingPoolManager trainingPoolManager;
 
-    private ParallelExecutor executor;
 
     @PostConstruct
     public void setup() throws IOException {
 
         //// Load resources
         //model              = Paths.get(resourceFolder,"resource.bin").toFile().getAbsolutePath();
-
-        executor = new ParallelExecutor();
 
         LOG.info("Service initialized");
     }
