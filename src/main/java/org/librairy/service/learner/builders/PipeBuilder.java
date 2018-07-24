@@ -3,12 +3,18 @@ package org.librairy.service.learner.builders;
 import cc.mallet.pipe.*;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.Instance;
+import cc.mallet.types.InstanceList;
 import com.google.common.base.Strings;
+import org.librairy.service.learner.executors.ParallelExecutor;
 import org.librairy.service.nlp.facade.model.PoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -19,7 +25,10 @@ public class PipeBuilder {
 
     private static final Logger LOG = LoggerFactory.getLogger(PipeBuilder.class);
 
-    public PipeBuilder() {
+    private final Integer size;
+
+    public PipeBuilder(Integer size) {
+        this.size = size;
     }
 
     public Pipe build(String pos, Boolean enableTarget, TokenSequenceRemoveStopwords stopWordTokenizer) {
@@ -91,23 +100,54 @@ public class PipeBuilder {
         FeatureDocFreqPipe docCounter = new FeatureDocFreqPipe(alphabet, null);
         if (docProportionCutoff < 1.0) pipeList.add(docCounter);
 
-        SerialPipes serialPipe = new SerialPipes(pipeList);
+        Pipe pipe = new SerialPipes(pipeList);
 
-        Iterator<Instance> iterator = serialPipe.newIteratorFrom(cvsIterator);
+        Instant startProcess = Instant.now();
 
-        int count = 0;
+        /**
+         *
+         */
+        Iterator<Instance> iterator = pipe.newParallelIteratorFrom(cvsIterator);
 
-        // We aren't really interested in the instance itself,
-        //  just the total feature counts.
+        ParallelExecutor executors = new ParallelExecutor();
+
         LOG.info("Getting stats to complete prune actions ..");
-        while (iterator.hasNext()) {
-            count++;
-            if (count % 100000 == 0) {
-                LOG.info("Docs analyzed: " + count);
+        int count = 0;
+        int interval = size < 100? 10 : size/100;
+        while(iterator.hasNext()){
+
+            try{
+                count++;
+                if (count % interval == 0) {
+                    LOG.info("Docs analyzed: " + count);
+                    Thread.sleep(10);
+                }
+                executors.submit(() -> {
+                    try {
+                        iterator.next();
+                    }catch (Exception e){
+                        LOG.error("Instance not handled by pipe: " + e.getMessage());
+                    }
+                });
+            }catch (Exception e){
+                LOG.error("Error reading next instance",e);
+                break;
             }
-            iterator.next();
+
         }
-        LOG.info("Prune stats collected");
+        LOG.info("Waiting for finish stats ...");
+        executors.awaitTermination(1, TimeUnit.MINUTES);
+
+
+        Instant endProcess = Instant.now();
+
+        String durationProcess = ChronoUnit.HOURS.between(startProcess, endProcess) + "hours "
+                + ChronoUnit.MINUTES.between(startProcess, endProcess) % 60 + "min "
+                + (ChronoUnit.SECONDS.between(startProcess, endProcess) % 60) + "secs "
+                + (ChronoUnit.MILLIS.between(startProcess, endProcess) % 60) + "msecs";
+
+
+        LOG.info("Prune stats collected in: " + durationProcess);
 
         if (minFreq > 0) {
             List<String> stopWordsByFreq = featureCounter.getPrunedWords(minFreq);

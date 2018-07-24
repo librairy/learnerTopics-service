@@ -13,7 +13,7 @@ src/main/bin/Dockerfile
 target/
 # BlueJ files
 *.ctxt
-
+loader/
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 

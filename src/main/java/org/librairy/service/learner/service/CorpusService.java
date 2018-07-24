@@ -181,7 +181,7 @@ public class CorpusService {
 
         writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
         setClosed(false);
-        LOG.info("corpus initialized");
+        LOG.info("corpus initialized with " + counter.get() + " documents");
     }
 
     private String updateLanguage(String text){

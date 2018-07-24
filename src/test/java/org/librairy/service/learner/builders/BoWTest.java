@@ -30,7 +30,7 @@ public class BoWTest {
     @Test
     public void minimal() throws IOException {
 
-        Pipe pipe = new PipeBuilder().buildMinimal();
+        Pipe pipe = new PipeBuilder(10).buildMinimal();
         InstanceList instances = new InstanceList(pipe);
 
         String regEx            = "(.*);;(.*);;(.*);;(.*)";
@@ -64,7 +64,7 @@ public class BoWTest {
     @Test
     public void bow() throws IOException {
 
-        Pipe pipe = new PipeBuilder().build("NOUN VERB", false, new TokenSequenceRemoveStopwords());
+        Pipe pipe = new PipeBuilder(10).build("NOUN VERB", false, new TokenSequenceRemoveStopwords());
         InstanceList instances = new InstanceList(pipe);
 
         String regEx            = "(.*);;(.*);;(.*);;(.*)";
