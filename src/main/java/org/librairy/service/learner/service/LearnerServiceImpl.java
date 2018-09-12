@@ -48,11 +48,11 @@ public class LearnerServiceImpl implements LearnerService {
 
 
     @Override
-    public String addDocument(Document document, boolean multigrams) throws AvroRemoteException {
+    public String addDocument(Document document, boolean multigrams, boolean raw) throws AvroRemoteException {
 
         try {
             document.setLabels(document.getLabels().stream().map(label -> label.replace(" ","_")).collect(Collectors.toList()));
-            corpusService.add(document,multigrams);
+            corpusService.add(document,multigrams,raw);
         } catch (Exception e) {
             LOG.error("IO Error",e);
         }

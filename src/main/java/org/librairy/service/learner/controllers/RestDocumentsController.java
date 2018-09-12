@@ -49,7 +49,7 @@ public class RestDocumentsController {
             @ApiResponse(code = 201, message = "Created", response = String.class),
     })
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Result> add(@RequestBody Document document, @RequestParam( defaultValue = "false") Boolean multigrams )  {
+    public ResponseEntity<Result> add(@RequestBody Document document, @RequestParam( defaultValue = "false") Boolean multigrams, @RequestParam( defaultValue = "false") Boolean raw )  {
         try {
             if (document.getLabels() == null) document.setLabels(Collections.emptyList());
 
@@ -63,7 +63,7 @@ public class RestDocumentsController {
                 return new ResponseEntity(new Result("empty text"),HttpStatus.BAD_REQUEST);
             }
 
-            String result = service.addDocument(document,multigrams);
+            String result = service.addDocument(document,multigrams,raw);
             return new ResponseEntity(new Result(result), HttpStatus.CREATED);
         } catch (AvroRemoteException e) {
             return new ResponseEntity(new Result("internal service seems down"),HttpStatus.FAILED_DEPENDENCY);

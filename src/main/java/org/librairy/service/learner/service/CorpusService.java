@@ -30,10 +30,7 @@ import javax.annotation.PreDestroy;
 import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -85,7 +82,7 @@ public class CorpusService {
 
         Iterator it = BuiltInLanguages.getLanguages().iterator();
 
-        List<String> availableLangs = Arrays.asList(new String[]{"en","es","fr","de"});
+        List<String> availableLangs = Arrays.asList(new String[]{"en","es","fr","de","pt"});
         while(it.hasNext()) {
             LdLocale locale = (LdLocale)it.next();
             if (availableLangs.contains(locale.getLanguage())) {
@@ -117,7 +114,7 @@ public class CorpusService {
         return counter.get();
     }
 
-    public void add(Document document, Boolean multigrams) throws IOException {
+    public void add(Document document, Boolean multigrams, Boolean raw) throws IOException {
         if (Strings.isNullOrEmpty(document.getText())) {
             LOG.warn("Document is empty: " + document.getId());
             return;
@@ -130,9 +127,7 @@ public class CorpusService {
         row.append(labels).append(SEPARATOR);
         updateLanguage(document.getText());
         // bow from nlp-service
-        List<Group> bows = librairyNlpClient.bow(document.getText(), language, Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE}), multigrams);
-        if (bows.isEmpty()) return;
-        String text = BoWService.toText(bows);
+        String text = raw? document.getText() : BoWService.toText(librairyNlpClient.bow(document.getText(), language, Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE}), multigrams));
         row.append(text);
         updated = TimeService.now();
         if (isClosed) initialize();
@@ -150,7 +145,6 @@ public class CorpusService {
             LOG.error("Unexpected Error writing on file: " + e.getMessage(),e);
         }
     }
-
 
     public void remove() throws IOException {
         LOG.info("Corpus deleted");

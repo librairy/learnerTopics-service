@@ -32,7 +32,7 @@ public class AvroIntTest {
 
         client.open(host,port);
 
-        client.addDocument(Document.newBuilder().setId("doc1").setText("sample text").build(),false);
+        client.addDocument(Document.newBuilder().setId("doc1").setText("sample text").build(),false,false);
         client.reset();
 
         client.close();

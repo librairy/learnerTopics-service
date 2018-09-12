@@ -50,11 +50,11 @@ public class InstanceBuilder {
      * @param maxDocRatio Remove words that occur in more than (X*100)% of documents. 0.05 is equivalent to IDF of 3.0.
      * @return
      */
-    public InstanceList getInstances(String filePath, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos, Integer minFreq, Double maxDocRatio) throws IOException {
+    public InstanceList getInstances(String filePath, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos, Integer minFreq, Double maxDocRatio, Boolean raw) throws IOException {
 
         Integer size = corpusService.getNumDocs();
 
-        PipeBuilder pipeBuilder = new PipeBuilder(size);
+        PipeBuilderI pipeBuilder = PipeBuilderFactory.newInstance(size, raw);
 
         File stoplist = Paths.get(Paths.get(resourceFolder).getParent().toString(), "stopwords.txt").toFile();
 

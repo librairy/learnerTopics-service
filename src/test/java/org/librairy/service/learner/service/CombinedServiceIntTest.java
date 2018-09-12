@@ -67,7 +67,7 @@ public class CombinedServiceIntTest {
         texts.parallelStream().forEach( text -> {
             Document document = Document.newBuilder().setId(String.valueOf(text.hashCode())).setName(String.valueOf(text.hashCode())).setLabels(Arrays.asList(new String[]{text.length()%2==0?"A":"B"})).setText(text).build();
             try {
-                learnerService.addDocument(document,true);
+                learnerService.addDocument(document,true,false);
             } catch (Exception e) {
                 e.printStackTrace();
             }
