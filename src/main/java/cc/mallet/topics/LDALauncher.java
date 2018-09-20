@@ -6,13 +6,14 @@ import org.librairy.service.learner.builders.MailBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -21,6 +22,9 @@ import java.time.temporal.ChronoUnit;
 public class LDALauncher {
 
     private static final Logger LOG = LoggerFactory.getLogger(LDALauncher.class);
+
+    @Value("#{environment['OUTPUT_DIR']?:'${output.dir}'}")
+    String outputDir;
 
     @Autowired
     InstanceBuilder instanceBuilder;
@@ -114,6 +118,15 @@ public class LDALauncher {
                 + ChronoUnit.MINUTES.between(startModel, endModel) % 60 + "min "
                 + (ChronoUnit.SECONDS.between(startModel, endModel) % 60) + "secs";
         LOG.info("Topic Model created in: " + durationModel);
+
+
+        LOG.info("saving doctopics to disk .. ");
+        File docTopicsFile = Paths.get(outputDir, "doctopics.csv.gz").toFile();
+        if (docTopicsFile.exists()) docTopicsFile.delete();
+        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(docTopicsFile, true))));
+
+        model.printDenseDocumentTopicsAsCSV(new PrintWriter(writer));
+        writer.close();
 
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords);

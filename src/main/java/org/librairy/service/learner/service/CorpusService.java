@@ -52,6 +52,8 @@ public class CorpusService {
 
     public static final String SEPARATOR = ";;";
 
+    private static final String DEFAULT_LANG = "en";
+
     private BufferedWriter writer;
     private Path filePath;
     private Boolean isClosed = false;
@@ -179,15 +181,19 @@ public class CorpusService {
     }
 
     private String updateLanguage(String text){
+        if (Strings.isNullOrEmpty(text)){
+            LOG.warn("empty text! english by default");
+            return DEFAULT_LANG;
+        }
         if (Strings.isNullOrEmpty(language)){
             LOG.info("detecting language from text: " + text.substring(0, text.length()>50? 50 : text.length()));
             TextObject textObject = textObjectFactory.forText(text);
             Optional<LdLocale> lang = languageDetector.detect(textObject);
-            LOG.info("Language=" + lang.get());
             if (!lang.isPresent()){
                 LOG.warn("language not detected! english by default");
-                return "en";
+                return DEFAULT_LANG;
             }
+            LOG.info("Language=" + lang.get());
             language = lang.get().getLanguage();
         }
         return language;
@@ -211,7 +217,7 @@ public class CorpusService {
     }
 
     public Path getFilePath(){
-        return  Paths.get(outputDir, "corpus.csv.gz");
+        return  Paths.get(outputDir, "bows.csv.gz");
     }
 
 }

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -64,8 +65,10 @@ public class CombinedServiceIntTest {
 
         learnerService.reset();
 
+        AtomicInteger counter = new AtomicInteger();
+
         texts.parallelStream().forEach( text -> {
-            Document document = Document.newBuilder().setId(String.valueOf(text.hashCode())).setName(String.valueOf(text.hashCode())).setLabels(Arrays.asList(new String[]{text.length()%2==0?"A":"B"})).setText(text).build();
+            Document document = Document.newBuilder().setId("doc"+counter.incrementAndGet()).setName(String.valueOf(text.hashCode())).setLabels(Arrays.asList(new String[]{text.length()%2==0?"A":"B"})).setText(text).build();
             try {
                 learnerService.addDocument(document,true,false);
             } catch (Exception e) {
@@ -73,13 +76,15 @@ public class CombinedServiceIntTest {
             }
         });
 
-        Map<String,String> parameters = ImmutableMap.of(
-                "topics","3",
-                "pos","NOUN VERB ADJECTIVE",
-                "minfreq","1",
-                "maxdocratio","0.95",
-                "algorithm","lda"
-        );
+        Map<String,String> parameters = new HashMap<>();
+
+        parameters.put("topics","3");
+        parameters.put("pos","NOUN VERB ADJECTIVE");
+        parameters.put("minfreq","1");
+        parameters.put("maxdocratio","0.95");
+        parameters.put("algorithm","lda");
+        parameters.put("iterations","100");
+
 
         String result = learnerService.train(parameters);
 
