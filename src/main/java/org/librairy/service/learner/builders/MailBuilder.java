@@ -39,6 +39,8 @@ public class MailBuilder {
     public void newMailTo(String dest){
         if (Strings.isNullOrEmpty(dest)) return;
 
+        LOG.info("sending an email with report .. ");
+
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.starttls.enable", "true");

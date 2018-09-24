@@ -84,6 +84,7 @@ public class CombinedServiceIntTest {
         parameters.put("maxdocratio","0.95");
         parameters.put("algorithm","lda");
         parameters.put("iterations","100");
+        parameters.put("inference","true");
 
 
         String result = learnerService.train(parameters);

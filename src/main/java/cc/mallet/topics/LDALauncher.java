@@ -123,14 +123,16 @@ public class LDALauncher {
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords);
 
-        LOG.info("saving doctopics to disk .. ");
-        File docTopicsFile = Paths.get(outputDir, "doctopics.csv.gz").toFile();
-        if (docTopicsFile.exists()) docTopicsFile.delete();
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(docTopicsFile, true))));
+        if (parameters.getInference()){
+            LOG.info("saving doctopics to disk .. ");
+            File docTopicsFile = Paths.get(outputDir, "doctopics.csv.gz").toFile();
+            if (docTopicsFile.exists()) docTopicsFile.delete();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(docTopicsFile, true))));
 
-        model.printDenseDocumentTopicsAsCSV(new PrintWriter(writer));
-        LOG.info("doctopics file created at: " + docTopicsFile.getAbsolutePath());
-        writer.close();
+            model.printDenseDocumentTopicsAsCSV(new PrintWriter(writer));
+            LOG.info("doctopics file created at: " + docTopicsFile.getAbsolutePath());
+            writer.close();
+        }
 
         mailBuilder.newMailTo(email);
 

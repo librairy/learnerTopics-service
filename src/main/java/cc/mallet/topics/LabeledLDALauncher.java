@@ -146,19 +146,23 @@ public class LabeledLDALauncher {
         parallelModel.buildInitialTypeTopicCounts();
 
 
-        LOG.info("saving doctopics to disk .. ");
-        File docTopicsFile = Paths.get(outputDir, "doctopics.csv.gz").toFile();
-        if (docTopicsFile.exists()) docTopicsFile.delete();
-        BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(docTopicsFile, true))));
-
-        parallelModel.printDenseDocumentTopicsAsCSV(new PrintWriter(writer));
-
-        writer.close();
-
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords);
 
+        if (parameters.getInference()){
+            LOG.info("saving doctopics to disk .. ");
+            File docTopicsFile = Paths.get(outputDir, "doctopics.csv.gz").toFile();
+            if (docTopicsFile.exists()) docTopicsFile.delete();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(docTopicsFile, true))));
+
+            parallelModel.printDenseDocumentTopicsAsCSV(new PrintWriter(writer));
+
+            writer.close();
+        }
+
         mailBuilder.newMailTo(email);
+
+        LOG.info(" Model created and saved successfully");
 
     }
 }
