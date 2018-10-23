@@ -44,7 +44,14 @@ public class LabeledLDALauncher {
         if (!outputDirFile.exists()) outputDirFile.mkdirs();
 
         Double alpha        = parameters.getAlpha();
+        if (alpha == 0.0){
+            alpha = 0.1;
+        }
+
         Double beta         = parameters.getBeta();
+        if (beta == 0.0){
+            beta = 0.1;
+        }
         Integer numTopWords = parameters.getNumTopWords();
         Integer numIterations = parameters.getNumIterations();
         String pos          = parameters.getPos();
@@ -146,9 +153,6 @@ public class LabeledLDALauncher {
         parallelModel.buildInitialTypeTopicCounts();
 
 
-        LOG.info("saving model to disk .. ");
-        modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords);
-
         if (parameters.getInference()){
             LOG.info("saving doctopics to disk .. ");
             File docTopicsFile = Paths.get(outputDir, "doctopics.csv.gz").toFile();
@@ -159,6 +163,9 @@ public class LabeledLDALauncher {
 
             writer.close();
         }
+
+        LOG.info("saving model to disk .. ");
+        modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords);
 
         mailBuilder.newMailTo(email);
 

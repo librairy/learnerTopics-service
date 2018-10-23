@@ -9,6 +9,7 @@ import org.junit.runner.RunWith;
 import org.librairy.service.learner.Application;
 import org.librairy.service.learner.facade.model.Document;
 import org.librairy.service.learner.facade.model.LearnerService;
+import org.librairy.service.learner.model.Export;
 import org.librairy.service.modeler.facade.model.Dimension;
 import org.librairy.service.modeler.facade.model.ModelerService;
 import org.slf4j.Logger;
@@ -40,6 +41,9 @@ public class CombinedServiceIntTest {
 
     @Autowired
     LearnerService learnerService;
+
+    @Autowired
+    ExportService exportService;
 
     List<String> texts = Arrays.asList(new String[]{
             "3 of Hearts is the self-titled debut studio album by the American group 3 of Hearts, released on March 6, 2001, through the record label RCA Nashville. It is a teen pop and country music album, though according to some music critics, it leans more towards pop music. The album was managed by American producer Byron Gallimore; its marketing focused on the group's crossover appeal to teenagers and young adults. 3 of Hearts performed on a national tour sponsored by Seventeen magazine and another sponsored by Walmart, and the singers were featured in several marketing campaigns. Reviews of the album were mixed; some critics praised the group's vocals and public image, but others criticized the songs as generic and lacking an authentic country sound.",

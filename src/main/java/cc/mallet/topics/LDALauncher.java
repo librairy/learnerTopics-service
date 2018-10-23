@@ -41,9 +41,19 @@ public class LDALauncher {
         File outputDirFile = Paths.get(parameters.getOutputDir()).toFile();
         if (!outputDirFile.exists()) outputDirFile.mkdirs();
 
-        Double alpha        = parameters.getAlpha();
-        Double beta         = parameters.getBeta();
         int numTopics       = parameters.getNumTopics();
+
+        Double alpha        = parameters.getAlpha();
+        if (alpha == 0.0){
+            alpha = (numTopics > 50)? 50.0 / Double.valueOf(numTopics) : 0.1;
+        }
+
+        Double beta         = parameters.getBeta();
+        if (beta == 0.0){
+            beta = 0.1;
+        }
+
+
         Integer numTopWords = parameters.getNumTopWords();
         Integer numIterations = parameters.getNumIterations();
         String pos          = parameters.getPos();
@@ -120,9 +130,6 @@ public class LDALauncher {
         LOG.info("Topic Model created in: " + durationModel);
 
 
-        LOG.info("saving model to disk .. ");
-        modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords);
-
         if (parameters.getInference()){
             LOG.info("saving doctopics to disk .. ");
             File docTopicsFile = Paths.get(outputDir, "doctopics.csv.gz").toFile();
@@ -130,9 +137,13 @@ public class LDALauncher {
             BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(docTopicsFile, true))));
 
             model.printDenseDocumentTopicsAsCSV(new PrintWriter(writer));
+
             LOG.info("doctopics file created at: " + docTopicsFile.getAbsolutePath());
             writer.close();
         }
+
+        LOG.info("saving model to disk .. ");
+        modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords);
 
         mailBuilder.newMailTo(email);
 
