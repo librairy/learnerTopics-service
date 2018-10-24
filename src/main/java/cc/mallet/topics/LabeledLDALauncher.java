@@ -44,14 +44,7 @@ public class LabeledLDALauncher {
         if (!outputDirFile.exists()) outputDirFile.mkdirs();
 
         Double alpha        = parameters.getAlpha();
-        if (alpha == 0.0){
-            alpha = 0.1;
-        }
-
         Double beta         = parameters.getBeta();
-        if (beta == 0.0){
-            beta = 0.1;
-        }
         Integer numTopWords = parameters.getNumTopWords();
         Integer numIterations = parameters.getNumIterations();
         String pos          = parameters.getPos();

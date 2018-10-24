@@ -42,18 +42,8 @@ public class LDALauncher {
         if (!outputDirFile.exists()) outputDirFile.mkdirs();
 
         int numTopics       = parameters.getNumTopics();
-
         Double alpha        = parameters.getAlpha();
-        if (alpha == 0.0){
-            alpha = (numTopics > 50)? 50.0 / Double.valueOf(numTopics) : 0.1;
-        }
-
         Double beta         = parameters.getBeta();
-        if (beta == 0.0){
-            beta = 0.1;
-        }
-
-
         Integer numTopWords = parameters.getNumTopWords();
         Integer numIterations = parameters.getNumIterations();
         String pos          = parameters.getPos();
