@@ -53,10 +53,10 @@ public class RestDocumentsController {
         try {
             if (document.getLabels() == null) document.setLabels(Collections.emptyList());
 
-            if (document.getLabels().stream().filter(label -> !labelPattern.matcher(label).matches()).count() > 0) {
-                LOG.warn("Invalid label values: " + document.getLabels());
-                return new ResponseEntity(new Result("invalid label values. It should be:  " + labelPattern.pattern()),HttpStatus.BAD_REQUEST);
-            }
+//            if (document.getLabels().stream().filter(label -> !labelPattern.matcher(label).matches()).count() > 0) {
+//                LOG.warn("Invalid label values: " + document.getLabels());
+//                return new ResponseEntity(new Result("invalid label values. It should be:  " + labelPattern.pattern()),HttpStatus.BAD_REQUEST);
+//            }
 
             if (Strings.isNullOrEmpty(document.getText())){
                 LOG.warn("Empty text: " + document.getId());
