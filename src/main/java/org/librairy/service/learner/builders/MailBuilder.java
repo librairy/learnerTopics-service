@@ -1,7 +1,7 @@
 package org.librairy.service.learner.builders;
 
 import com.google.common.base.Strings;
-import org.librairy.service.modeler.facade.model.Model;
+import org.librairy.service.modeler.facade.model.Settings;
 import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.Properties;
 
@@ -69,10 +68,10 @@ public class MailBuilder {
             StringBuilder description = new StringBuilder();
             description.append("# Topics \n");
             topicsService.getTopics().forEach(topic -> {
-                description.append("- '"+topic.getName()+"': {"+topic.getDescription()+"}\n");
+                description.append("- '"+topic.getId()+"': {"+topic.getDescription()+"}\n");
             });
 
-            Model model = topicsService.getModel();
+            Settings model = topicsService.getSettings();
             description.append("\n# Params \n");
             description.append("- algorithm: ").append(model.getAlgorithm()).append("\n");
             model.getParams().entrySet().stream().forEach(entry -> {

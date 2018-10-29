@@ -16,6 +16,7 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -144,18 +145,6 @@ public class LabeledLDALauncher {
 
         parallelModel.topicAlphabet = labelAlphabet;
         parallelModel.buildInitialTypeTopicCounts();
-
-
-        if (parameters.getInference()){
-            LOG.info("saving doctopics to disk .. ");
-            File docTopicsFile = Paths.get(outputDir, "doctopics.csv.gz").toFile();
-            if (docTopicsFile.exists()) docTopicsFile.delete();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(docTopicsFile, true))));
-
-            parallelModel.printDenseDocumentTopicsAsCSV(new PrintWriter(writer));
-
-            writer.close();
-        }
 
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords);

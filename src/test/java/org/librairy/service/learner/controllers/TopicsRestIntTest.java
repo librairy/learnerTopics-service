@@ -9,7 +9,6 @@ import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
 import org.assertj.core.util.Strings;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.librairy.service.learner.Application;
@@ -39,7 +38,7 @@ public class TopicsRestIntTest {
     private static final Logger LOG = LoggerFactory.getLogger(TopicsRestIntTest.class);
 
     @Autowired
-    LearnerRestDimensionsController service;
+    LearnerRestTopicsController service;
 
 
     static{

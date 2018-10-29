@@ -8,7 +8,7 @@ import org.apache.avro.AvroRemoteException;
 import org.librairy.service.learner.facade.model.LearnerService;
 import org.librairy.service.learner.facade.rest.model.ModelParameters;
 import org.librairy.service.learner.facade.rest.model.Result;
-import org.librairy.service.modeler.controllers.RestDimensionsController;
+import org.librairy.service.modeler.controllers.RestTopicsController;
 import org.librairy.service.modeler.facade.model.ModelerService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,11 +24,11 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 @RestController
-@RequestMapping("/dimensions")
-@Api(tags="/dimensions", description = "topics management")
-public class LearnerRestDimensionsController extends RestDimensionsController {
+@RequestMapping("/topics")
+@Api(tags="/topics", description = "topics management")
+public class LearnerRestTopicsController extends RestTopicsController {
 
-    private static final Logger LOG = LoggerFactory.getLogger(LearnerRestDimensionsController.class);
+    private static final Logger LOG = LoggerFactory.getLogger(LearnerRestTopicsController.class);
 
     @Autowired
     ModelerService modelerService;

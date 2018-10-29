@@ -4,6 +4,7 @@
 *.idea
 target/
 output/
+src/test/bin/model
 src/main/bin/model
 src/main/bin/Dockerfile
 # Log file

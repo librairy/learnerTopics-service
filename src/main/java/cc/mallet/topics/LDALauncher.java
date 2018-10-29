@@ -13,6 +13,7 @@ import java.io.*;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -119,18 +120,6 @@ public class LDALauncher {
                 + (ChronoUnit.SECONDS.between(startModel, endModel) % 60) + "secs";
         LOG.info("Topic Model created in: " + durationModel);
 
-
-        if (parameters.getInference()){
-            LOG.info("saving doctopics to disk .. ");
-            File docTopicsFile = Paths.get(outputDir, "doctopics.csv.gz").toFile();
-            if (docTopicsFile.exists()) docTopicsFile.delete();
-            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(docTopicsFile, true))));
-
-            model.printDenseDocumentTopicsAsCSV(new PrintWriter(writer));
-
-            LOG.info("doctopics file created at: " + docTopicsFile.getAbsolutePath());
-            writer.close();
-        }
 
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords);
