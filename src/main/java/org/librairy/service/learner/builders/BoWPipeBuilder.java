@@ -1,6 +1,7 @@
 package org.librairy.service.learner.builders;
 
 import cc.mallet.pipe.*;
+import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.Alphabet;
 import cc.mallet.types.Instance;
 import com.google.common.base.Strings;
