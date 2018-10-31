@@ -105,6 +105,8 @@ public class InstanceBuilder {
                         instances.remove(rawInstance);
                     }
                 });
+            }catch (IllegalStateException e){
+                LOG.warn("Error reading next instance",e);
             }catch (Exception e){
                 LOG.error("Error reading next instance",e);
                 break;
