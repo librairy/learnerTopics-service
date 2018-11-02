@@ -122,7 +122,7 @@ public class LDALauncher {
 
 
         LOG.info("saving model to disk .. ");
-        modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords);
+        modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords, instances.getPipe());
 
         mailBuilder.newMailTo(email);
 

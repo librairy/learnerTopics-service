@@ -63,6 +63,7 @@ public class LabeledLDALauncher {
 
         InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), true, pos, parameters.getMinFreq(), parameters.getMaxDocRatio(),raw);
 
+
         int numWords = instances.getDataAlphabet().size();
         if ( numWords <= 10){
             LOG.warn("Not enough words ("+numWords+") to train a model. Task aborted");
@@ -122,34 +123,34 @@ public class LabeledLDALauncher {
         double loglikelihood = labeledLDA.modelLogLikelihood();
         LOG.info("logLikelihood = " + loglikelihood);
 
+
         //
-        ParallelTopicModel parallelModel = new ParallelTopicModel(labeledLDA.getTopicAlphabet(), alpha * (double)labeledLDA.numTopics, beta);
+        ParallelTopicModel parallelModel = new ParallelTopicModel(labeledLDA.topicAlphabet, labeledLDA.alpha * labeledLDA.numTopics, labeledLDA.beta);
         parallelModel.data                  = labeledLDA.data;
         parallelModel.alphabet              = labeledLDA.alphabet;
         parallelModel.numTypes              = labeledLDA.numTypes;
         parallelModel.betaSum               = labeledLDA.betaSum;
+        parallelModel.numTopics             = labeledLDA.numTopics;
         parallelModel.stoplist              = labeledLDA.stoplist;
         parallelModel.tokensPerTopic        = labeledLDA.tokensPerTopic;
         parallelModel.typeTopicCounts       = labeledLDA.typeTopicCounts;
         parallelModel.maxRetries            = labeledLDA.maxRetries;
         parallelModel.numIterations         = labeledLDA.numIterations;
-        parallelModel.numTopics             = labeledLDA.numTopics;
         parallelModel.showTopicsInterval    = labeledLDA.showTopicsInterval;
         parallelModel.wordsPerTopic         = labeledLDA.wordsPerTopic;
         parallelModel.validateTopicsInterval         = labeledLDA.validateTopicsInterval;
-
+//
         LabelAlphabet labelAlphabet = new LabelAlphabet();
         for(int i=0; i<labeledLDA.labelAlphabet.size();i++){
             labelAlphabet.lookupIndex(labeledLDA.labelAlphabet.lookupObject(i),true);
         }
 
         parallelModel.topicAlphabet = labelAlphabet;
+
         parallelModel.buildInitialTypeTopicCounts();
 
         LOG.info("saving model to disk .. ");
-        modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords);
-
-        mailBuilder.newMailTo(email);
+        modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords, instances.getPipe());
 
         LOG.info(" Model created and saved successfully");
 

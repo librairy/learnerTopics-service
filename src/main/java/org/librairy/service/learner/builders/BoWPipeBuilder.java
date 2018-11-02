@@ -125,7 +125,7 @@ public class BoWPipeBuilder implements PipeBuilderI{
                     try {
                         iterator.next();
                     }catch (Exception e){
-                        LOG.error("Instance not handled by pipe: " + e.getMessage());
+                        LOG.error("Instance not handled by pipe: " + e.getMessage(),e);
                     }
                 });
             }catch (Exception e){
