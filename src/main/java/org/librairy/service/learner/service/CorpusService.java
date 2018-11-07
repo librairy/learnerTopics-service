@@ -157,10 +157,10 @@ public class CorpusService {
     }
 
     private synchronized void initialize() throws IOException {
-        LOG.info("Loading corpus..");
         filePath = getFilePath();
 
         if (filePath.toFile().exists()){
+            LOG.info("Loading an existing corpus..");
             try{
                 BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath.toFile()))));
                 counter.set(Long.valueOf(reader.lines().count()).intValue());
@@ -171,6 +171,7 @@ public class CorpusService {
                 LOG.debug("Error reading lines in existing file: " + filePath,e);
             }
         }else{
+            LOG.info("Initialized an empty corpus..");
             filePath.toFile().getParentFile().mkdirs();
             language = null;
         }
