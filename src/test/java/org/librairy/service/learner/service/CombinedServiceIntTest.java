@@ -91,7 +91,7 @@ public class CombinedServiceIntTest {
         parameters.put("algorithm","llda");
         parameters.put("iterations","100");
         parameters.put("inference","true");
-        parameters.put("multiwords","false");
+        parameters.put("entities","true");
 
 
         String result = learnerService.train(parameters);

@@ -67,7 +67,8 @@ public class TrainingPoolManager {
                 if (parameters.containsKey("maxdocratio"))  ldaParameters.setMaxDocRatio(Double.valueOf(parameters.get("maxdocratio")));
                 if (parameters.containsKey("raw"))          ldaParameters.setRaw(Boolean.valueOf(parameters.get("raw")));
                 if (parameters.containsKey("inference"))    ldaParameters.setInference(Boolean.valueOf(parameters.get("inference")));
-
+                if (parameters.containsKey("multigrams"))   ldaParameters.setEntities(Boolean.valueOf(parameters.get("multigrams")));
+                if (parameters.containsKey("entities"))     ldaParameters.setEntities(Boolean.valueOf(parameters.get("entities")));
 
                 modelFactory.train(parameters,ldaParameters);
             } catch (IOException e) {
