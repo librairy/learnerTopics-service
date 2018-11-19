@@ -3,6 +3,7 @@ package cc.mallet.topics;
 import cc.mallet.types.InstanceList;
 import org.librairy.service.learner.builders.InstanceBuilder;
 import org.librairy.service.learner.builders.MailBuilder;
+import org.librairy.service.modeler.service.InferencePoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,9 @@ public class LDALauncher {
 
     @Autowired
     MailBuilder mailBuilder;
+
+    @Autowired
+    InferencePoolManager inferencePoolManager;
 
 
     public void train(ModelParams parameters, String email) throws IOException {
@@ -71,6 +75,8 @@ public class LDALauncher {
         parameters.getStopwords().forEach(word -> model.addStop(word));
 
         model.addInstances(instances);
+
+//        model.setRandomSeed(-1);
 
         int size = instances.size();
         Instant endProcess = Instant.now();
@@ -125,6 +131,12 @@ public class LDALauncher {
         modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords, instances.getPipe());
 
         mailBuilder.newMailTo(email);
+
+        try {
+            inferencePoolManager.update(model.getAlphabet(), instances.getPipe());
+        } catch (Exception e) {
+            LOG.error("Unexpected error creating inference for a new model",e);
+        }
 
         LOG.info(" Model created and saved successfully");
 

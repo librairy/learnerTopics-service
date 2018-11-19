@@ -60,6 +60,7 @@ public class CorpusService {
     private AtomicInteger counter   = new AtomicInteger(0);
     private String updated = "";
     private String language = null;
+    private AtomicInteger pendingDocs = new AtomicInteger();
 
 
     private final Escaper escaper = Escapers.builder()
@@ -117,10 +118,11 @@ public class CorpusService {
     }
 
     public void add(Document document, Boolean multigrams, Boolean raw) throws IOException {
-        if (Strings.isNullOrEmpty(document.getText())) {
+        if (Strings.isNullOrEmpty(document.getText()) || Strings.isNullOrEmpty(document.getText().replace("\n","").trim())) {
             LOG.warn("Document is empty: " + document.getId());
             return;
         }
+        pendingDocs.incrementAndGet();
         StringBuilder row = new StringBuilder();
         row.append(document.getId()).append(SEPARATOR);
         row.append(escaper.escape(document.getName())).append(SEPARATOR);
@@ -129,18 +131,20 @@ public class CorpusService {
         row.append(labels).append(SEPARATOR);
         updateLanguage(document.getText());
         // bow from nlp-service
-        String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADVERB, PoS.ADJECTIVE}), multigrams));
+        //String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADJECTIVE}), multigrams));
+        String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Collections.emptyList(), multigrams));
         row.append(text);
         updated = TimeService.now();
         if (isClosed) initialize();
         write(row.toString()+"\n");
-        counter.incrementAndGet();
         LOG.info("Added document: [" + document.getId() + " | " + document.getName() + "] to corpus");
+        pendingDocs.decrementAndGet();
     }
 
     private synchronized void write(String text){
         try {
             writer.write(text);
+            counter.incrementAndGet();
         } catch (IOException e) {
             LOG.warn("Error writing on file: " + e.getMessage());
         } catch (Exception e){
@@ -148,7 +152,7 @@ public class CorpusService {
         }
     }
 
-    public void remove() throws IOException {
+    public synchronized void remove() throws IOException {
         LOG.info("Corpus deleted");
         counter.set(0);
         close();
@@ -201,6 +205,17 @@ public class CorpusService {
     }
 
     public void close() throws IOException {
+        while(pendingDocs.get() > 0){
+            LOG.info("waiting for adding "+pendingDocs.get()+" pending docs... ");
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e) {
+                LOG.warn("Interrupted",e);
+            }
+        }
+
+        LOG.info("Pending docs: " + pendingDocs.get());
+
         setClosed(true);
         if (writer != null){
             try{

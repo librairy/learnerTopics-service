@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -38,7 +39,11 @@ public class BoWTest {
         CsvIterator iterator = new CsvIterator(reader, regEx, dataGroup, targetGroup, uriGroup);
 
         // Now process each instance provided by the iterator.
-        instances.addThruPipe(iterator);
+        try{
+            instances.addThruPipe(iterator);
+        }catch (NoSuchElementException e){
+            LOG.info("list completed");
+        }
 
         reader.close();
 
@@ -72,7 +77,11 @@ public class BoWTest {
         CsvIterator iterator = new CsvIterator(reader, regEx, dataGroup, targetGroup, uriGroup);
 
         // Now process each instance provided by the iterator.
-        instances.addThruPipe(iterator);
+        try{
+            instances.addThruPipe(iterator);
+        }catch (NoSuchElementException e){
+            LOG.info("list completed");
+        }
 
         reader.close();
 

@@ -123,7 +123,10 @@ public class BoWPipeBuilder implements PipeBuilderI{
                 }
                 executors.submit(() -> {
                     try {
-                        iterator.next();
+                        Instance instance = iterator.next();
+                        LOG.debug("Instance: " + instance.getName());
+                    }catch (NoSuchElementException e){
+                        LOG.info("list completed");
                     }catch (Exception e){
                         LOG.error("Instance not handled by pipe: " + e.getMessage(),e);
                     }
@@ -136,7 +139,7 @@ public class BoWPipeBuilder implements PipeBuilderI{
         }
         LOG.info("Waiting for finish stats ...");
         executors.awaitTermination(1, TimeUnit.MINUTES);
-
+        LOG.info("Docs analyzed: " + count);
 
         Instant endProcess = Instant.now();
 

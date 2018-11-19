@@ -6,6 +6,7 @@ import cc.mallet.types.InstanceList;
 import cc.mallet.types.LabelAlphabet;
 import org.librairy.service.learner.builders.InstanceBuilder;
 import org.librairy.service.learner.builders.MailBuilder;
+import org.librairy.service.modeler.service.InferencePoolManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +40,9 @@ public class LabeledLDALauncher {
     @Autowired
     MailBuilder mailBuilder;
 
+    @Autowired
+    InferencePoolManager inferencePoolManager;
+
     public void train(ModelParams parameters, String email) throws IOException {
 
         File outputDirFile = Paths.get(parameters.getOutputDir()).toFile();
@@ -57,7 +61,7 @@ public class LabeledLDALauncher {
 
         parameters.getStopwords().forEach(word -> labeledLDA.addStop(word));
 
-        //labeledLDA.setRandomSeed(100);
+//        labeledLDA.setRandomSeed(-1);
 
         Instant startProcess = Instant.now();
 
@@ -151,6 +155,13 @@ public class LabeledLDALauncher {
 
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords, instances.getPipe());
+
+        try {
+            inferencePoolManager.update(labeledLDA.getAlphabet(), instances.getPipe());
+        } catch (Exception e) {
+            LOG.error("Unexpected error creating inference for a new model",e);
+        }
+
 
         LOG.info(" Model created and saved successfully");
 

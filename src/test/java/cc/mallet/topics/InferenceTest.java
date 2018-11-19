@@ -28,6 +28,7 @@ import org.librairy.service.nlp.facade.model.PoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
@@ -50,6 +51,9 @@ import java.util.stream.Collectors;
 @WebAppConfiguration
 public class InferenceTest {
 
+    @Value("#{environment['RESOURCE_FOLDER']?:'${resource.folder}'}")
+    String resourceFolder;
+
     @Autowired
     CorpusService corpusService;
 
@@ -67,6 +71,9 @@ public class InferenceTest {
 
     @Autowired
     LabeledLDALauncher launcher;
+
+    @Autowired
+    ModelLauncher ldaLauncher;
 
     private static final Logger LOG = LoggerFactory.getLogger(InferenceTest.class);
 
@@ -258,11 +265,44 @@ public class InferenceTest {
         Files.readAllLines(Paths.get(distFile.getAbsolutePath())).forEach(line -> LOG.info("Inference: " + line));
 
 
+    }
 
 
+    @Test
+    @Ignore
+    public void rawtext() throws Exception {
+        String data = "nonhuman=6#ADJECTIVE# primate=6#NOUN# human=5#ADJECTIVE# representation=4#NOUN# brain=4#NOUN# datum=3#NOUN# project=3#NOUN# relate=3#VERB# computational_models=3#NOUN# rsa=3#NOUN# be=2#VERB# multivariate=2#ADJECTIVE# technique=2#NOUN# dissimilarity=2#NOUN# analysis=2#NOUN# matrix=2#NOUN# region=2#NOUN# object_recognition=2#NOUN# brain-activity=2#NOUN# poorly=1#ADVERB# compare=1#VERB# idea=1#NOUN# code=1#NOUN# activity=1#NOUN# representationally=1#ADVERB# study=1#NOUN# best=1#ADVERB# contribute=1#VERB# cell=1#NOUN# computational_neuroscience=1#NOUN# acquire=1#VERB# integral=1#ADJECTIVE# divide=1#VERB# similarity=1#NOUN# pattern=1#NOUN# recording=1#NOUN# moreover=1#ADVERB# key=1#ADJECTIVE# here=1#ADVERB# general=1#ADJECTIVE# more=1#ADVERB# means=1#NOUN# statistically=1#ADVERB# determine=1#VERB# visual=1#ADJECTIVE# pulation-code=1#ADJECTIVE# computation=1#NOUN# match=1#VERB# human_brain=1#NOUN# massively=1#ADVERB# form=1#VERB# call=1#VERB# freely=1#ADVERB# such=1#ADJECTIVE# characterize=1#VERB# component=1#NOUN# cortical=1#ADJECTIVE# stimulus-evoked=1#ADJECTIVE# novel=1#ADJECTIVE# representational=1#ADJECTIVE# challenge=1#NOUN# spatiotemporal=1#ADJECTIVE# further=1#ADVERB# homologous=1#ADJECTIVE# representational_content=1#NOUN# explain=1#VERB# approach=1#NOUN# available=1#ADJECTIVE# focus=1#NOUN# easy-to-use=1#ADJECTIVE# provide=1#VERB# empirical_data=1#NOUN# integrated_systems=1#NOUN# visualize=1#VERB# problem=1#NOUN# implication=1#NOUN# richly=1#ADVERB# major=1#ADJECTIVE# community=1#NOUN# matlab=1#NOUN# test=1#VERB# functional_magnetic_resonance_imaging_(fmri)=1#NOUN# neuroscience=1#NOUN# population=1#NOUN# understand=1#VERB# still=1#ADVERB# develop=1#VERB# exist=1#VERB# core=1#NOUN# bridge=1#NOUN# contrast=1#NOUN# fmrus=1#NOUN# theory=1#NOUN# toolbox=1#NOUN# tackle=1#VERB# animal_models=1#NOUN# give=1#VERB#";
+        String name = "";
+        String source = null;
+        String target = "";
 
+//        InstanceList previousInstanceList = InstanceList.load(new File("src/test/bin/model/instances.data"));
+//        Pipe pipe = previousInstanceList.getPipe();
 
+        Instance rawInstance = new Instance(data,target,name,source);
 
+//        Pipe pipe = PipeBuilderFactory.newInstance(raw).build(this.pos);
+
+        Pipe pipe = ldaLauncher.readModelPipe(resourceFolder);
+        InstanceList instances = new InstanceList(pipe);
+        instances.addThruPipe(rawInstance);
+
+        // Use model alphabet to set features
+        Alphabet alphabet = ldaLauncher.readModelAlphabet(resourceFolder);
+        FeatureSequence fs = (FeatureSequence) rawInstance.getData();
+        FeatureSequence featureData = new FeatureSequence(alphabet);
+        for( int i=0; i< fs.getLength(); i++){
+            String feature = (String) fs.get(i);
+            featureData.add(feature);
+        }
+
+        int thinning = 1;//1
+        int burnIn = 5;//5
+        int iterations = 100;
+        TopicInferencer topicInferer = ldaLauncher.getTopicInferencer(resourceFolder);
+        double[] topicDistribution = topicInferer.getSampledDistribution(new Instance(featureData, target, name, source), iterations, thinning, burnIn);
+
+        LOG.info("Topic Distribution : " + Arrays.toString(topicDistribution));
     }
 
 }

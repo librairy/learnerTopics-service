@@ -91,7 +91,7 @@ public class InstanceBuilder {
         int interval = size < 100? 10 : size/100;
         while(cvsIterator.hasNext()){
 
-            try{
+            try {
                 final Instance rawInstance = cvsIterator.next();
                 if (counter.incrementAndGet() % interval == 0) {
                     LOG.info(counter.get() + " docs processed");
@@ -100,13 +100,15 @@ public class InstanceBuilder {
                 executors.submit(() -> {
                     try {
                         instances.addThruPipe(rawInstance);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         LOG.error("Instance not handled by pipe: " + e.getMessage());
                         instances.remove(rawInstance);
                     }
                 });
             }catch (IllegalStateException e){
                 LOG.warn("Error reading next instance",e);
+            }catch (RuntimeException e){
+                LOG.info("Handle Runtime Info: " + e.getMessage());
             }catch (Exception e){
                 LOG.error("Error reading next instance",e);
                 break;
@@ -126,7 +128,7 @@ public class InstanceBuilder {
                 + (ChronoUnit.MILLIS.between(startProcess, endProcess) % 60) + "msecs";
 
 
-        LOG.info("Docs processed in: " + durationProcess);
+        LOG.info(counter.get() + " docs processed in: " + durationProcess);
 
         csvReader.close();
 
