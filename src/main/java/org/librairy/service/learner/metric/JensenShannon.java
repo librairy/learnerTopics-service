@@ -1,4 +1,4 @@
-package org.librairy.service.learner.builders;
+package org.librairy.service.learner.metric;
 
 import cc.mallet.util.Maths;
 import com.google.common.primitives.Doubles;

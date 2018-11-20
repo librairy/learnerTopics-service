@@ -1,4 +1,4 @@
-package org.librairy.service.learner.builders;
+package org.librairy.service.learner.metric;
 
 import com.google.common.primitives.Doubles;
 import org.apache.commons.math3.stat.StatUtils;
