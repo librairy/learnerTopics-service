@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -50,7 +51,7 @@ public class InstanceBuilder {
      * @param maxDocRatio Remove words that occur in more than (X*100)% of documents. 0.05 is equivalent to IDF of 3.0.
      * @return
      */
-    public InstanceList getInstances(String filePath, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos, Integer minFreq, Double maxDocRatio, Boolean raw) throws IOException {
+    public InstanceList getInstances(String filePath, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos, Integer minFreq, Double maxDocRatio, Boolean raw, List<String> stopwords) throws IOException {
 
         Integer size = corpusService.getNumDocs();
 
@@ -60,7 +61,10 @@ public class InstanceBuilder {
 
         TokenSequenceRemoveStopwords tokenizer;
 
-        if (!stoplist.exists()){
+        if (!stopwords.isEmpty()){
+            tokenizer = new TokenSequenceRemoveStopwords(false, false);
+            tokenizer.addStopWords(stopwords);
+        }else if (!stoplist.exists()){
             LOG.info("No stopwords file found");
             tokenizer = new TokenSequenceRemoveStopwords(false, false);
         }else{
@@ -95,7 +99,7 @@ public class InstanceBuilder {
                 final Instance rawInstance = cvsIterator.next();
                 if (counter.incrementAndGet() % interval == 0) {
                     LOG.info(counter.get() + " docs processed");
-//                    Thread.sleep(10);
+                    Thread.sleep(10);
                 }
                 executors.submit(() -> {
                     try {
