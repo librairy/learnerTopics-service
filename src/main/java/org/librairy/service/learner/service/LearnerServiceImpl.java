@@ -36,6 +36,8 @@ public class LearnerServiceImpl implements LearnerService {
     @Autowired
     TrainingPoolManager trainingPoolManager;
 
+    private ParallelExecutor executor;
+
 
     @PostConstruct
     public void setup() throws IOException {
@@ -43,6 +45,7 @@ public class LearnerServiceImpl implements LearnerService {
         //// Load resources
         //model              = Paths.get(resourceFolder,"resource.bin").toFile().getAbsolutePath();
 
+        executor             = new ParallelExecutor();
         LOG.info("Service initialized");
     }
 
@@ -50,14 +53,14 @@ public class LearnerServiceImpl implements LearnerService {
     @Override
     public String addDocument(Document document, boolean multigrams, boolean raw) throws AvroRemoteException {
 
-        try {
-            document.setLabels(document.getLabels().stream().map(label -> label.replace(" ","_")).collect(Collectors.toList()));
-            corpusService.add(document,multigrams,raw);
-        } catch (Exception e) {
-            LOG.error("IO Error",e);
-        }
-//        executor.submit(() -> {
-//        });
+        executor.submit(() -> {
+            try {
+                document.setLabels(document.getLabels().stream().map(label -> label.replace(" ","_")).collect(Collectors.toList()));
+                corpusService.add(document,multigrams,raw);
+            } catch (Exception e) {
+                LOG.error("IO Error",e);
+            }
+        });
         return "document added";
     }
 
