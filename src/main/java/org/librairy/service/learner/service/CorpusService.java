@@ -17,8 +17,6 @@ import com.optimaize.langdetect.text.TextObjectFactory;
 import org.librairy.service.learner.facade.model.Document;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.librairy.service.modeler.service.BoWService;
-import org.librairy.service.nlp.facade.model.Group;
-import org.librairy.service.nlp.facade.model.PoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,21 +157,10 @@ public class CorpusService {
         initialize();
     }
 
-    private synchronized void initialize() throws IOException {
+    public synchronized void initialize() throws IOException {
         filePath = getFilePath();
 
-        if (filePath.toFile().exists()){
-            LOG.info("Loading an existing corpus..");
-            try{
-                BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath.toFile()))));
-                counter.set(Long.valueOf(reader.lines().count()).intValue());
-                updated = TimeService.from(filePath.toFile().lastModified());
-                updateLanguage(reader.readLine());
-                reader.close();
-            }catch (Exception e){
-                LOG.debug("Error reading lines in existing file: " + filePath,e);
-            }
-        }else{
+        if (!load()){
             LOG.info("Initialized an empty corpus..");
             filePath.toFile().getParentFile().mkdirs();
             language = null;
@@ -182,6 +169,25 @@ public class CorpusService {
         writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
         setClosed(false);
         LOG.info("corpus initialized with " + counter.get() + " documents");
+    }
+
+
+    public synchronized boolean load(){
+        filePath = getFilePath();
+
+        if (!filePath.toFile().exists()) return false;
+        LOG.info("Loading an existing corpus..");
+        try{
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath.toFile()))));
+            updateLanguage(reader.readLine());
+            counter.set(Long.valueOf(reader.lines().count()).intValue()+1);
+            updated = TimeService.from(filePath.toFile().lastModified());
+            reader.close();
+            return true;
+        }catch (Exception e){
+            LOG.debug("Error reading lines in existing file: " + filePath,e);
+            return false;
+        }
     }
 
     private String updateLanguage(String text){
@@ -205,7 +211,7 @@ public class CorpusService {
 
     public void close() throws IOException {
         while(pendingDocs.get() > 0){
-            LOG.info("waiting for adding "+pendingDocs.get()+" pending docs... ");
+            LOG.info("waiting for adding "+pendingDocs.get()+" pending docs to close it... ");
             try {
                 Thread.sleep(5000);
             } catch (InterruptedException e) {

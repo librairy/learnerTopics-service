@@ -6,12 +6,10 @@ import org.librairy.service.learner.facade.model.Corpus;
 import org.librairy.service.learner.facade.model.Document;
 import org.librairy.service.learner.facade.model.LearnerService;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
-import org.librairy.service.modeler.service.InferencePoolManager;
 import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -78,18 +76,20 @@ public class LearnerServiceImpl implements LearnerService {
 
     @Override
     public String train(Map<String, String> map) throws AvroRemoteException {
-        if (corpusService.getNumDocs() <= 0 ){
-            LOG.info("Corpus is empty.");
-            return "Corpus is empty";
-        }
-        LOG.info("Training a new model from parameters: " + map + " with a corpus of " + corpusService.getNumDocs() + " docs");
+
         try {
             corpusService.close();
+            corpusService.load();
             topicsService.remove();
+            if (corpusService.getNumDocs() <= 0 ){
+                LOG.info("Corpus is empty.");
+                return "Corpus is empty";
+            }
         } catch (IOException e) {
             throw new AvroRemoteException("IO Error",e);
         }
 
+        LOG.info("Training a new model from parameters: " + map + " with a corpus of " + corpusService.getNumDocs() + " docs");
         if (trainingPoolManager.train(map))
             return "building a new model";
         else return "There is currently a model training";
