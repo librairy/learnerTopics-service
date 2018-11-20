@@ -7,6 +7,7 @@ import cc.mallet.types.LabelAlphabet;
 import org.librairy.service.learner.builders.InstanceBuilder;
 import org.librairy.service.learner.builders.MailBuilder;
 import org.librairy.service.modeler.service.InferencePoolManager;
+import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,9 +41,6 @@ public class LabeledLDALauncher {
     @Autowired
     MailBuilder mailBuilder;
 
-    @Autowired
-    InferencePoolManager inferencePoolManager;
-
     public void train(ModelParams parameters, String email) throws IOException {
 
         File outputDirFile = Paths.get(parameters.getOutputDir()).toFile();
@@ -55,18 +53,16 @@ public class LabeledLDALauncher {
         String pos          = parameters.getPos();
         Integer maxRetries  = parameters.getNumRetries();
         Boolean raw         = parameters.getRaw();
+        Integer seed        = parameters.getSeed();
 
 
         LabeledLDA labeledLDA = new LabeledLDA(alpha, beta);
 
-        parameters.getStopwords().forEach(word -> labeledLDA.addStop(word));
-
-//        labeledLDA.setRandomSeed(-1);
+        labeledLDA.setRandomSeed(seed);
 
         Instant startProcess = Instant.now();
 
-        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), true, pos, parameters.getMinFreq(), parameters.getMaxDocRatio(),raw);
-
+        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), true, pos, parameters.getMinFreq(), parameters.getMaxDocRatio(),raw, parameters.getStopwords());
 
         int numWords = instances.getDataAlphabet().size();
         if ( numWords <= 10){
@@ -74,7 +70,7 @@ public class LabeledLDALauncher {
             return;
         }
 
-        LOG.info("Data loaded.");
+        LOG.info("Instances created");
         if(instances.size() > 0 && instances.get(0) != null) {
             Object e = ((Instance)instances.get(0)).getData();
             if(!(e instanceof FeatureSequence)) {
@@ -128,22 +124,23 @@ public class LabeledLDALauncher {
         LOG.info("logLikelihood = " + loglikelihood);
 
 
-        //
+
         ParallelTopicModel parallelModel = new ParallelTopicModel(labeledLDA.topicAlphabet, labeledLDA.alpha * labeledLDA.numTopics, labeledLDA.beta);
-        parallelModel.data                  = labeledLDA.data;
-        parallelModel.alphabet              = labeledLDA.alphabet;
-        parallelModel.numTypes              = labeledLDA.numTypes;
-        parallelModel.betaSum               = labeledLDA.betaSum;
-        parallelModel.numTopics             = labeledLDA.numTopics;
-        parallelModel.stoplist              = labeledLDA.stoplist;
-        parallelModel.tokensPerTopic        = labeledLDA.tokensPerTopic;
-        parallelModel.typeTopicCounts       = labeledLDA.typeTopicCounts;
-        parallelModel.maxRetries            = labeledLDA.maxRetries;
-        parallelModel.numIterations         = labeledLDA.numIterations;
-        parallelModel.showTopicsInterval    = labeledLDA.showTopicsInterval;
-        parallelModel.wordsPerTopic         = labeledLDA.wordsPerTopic;
-        parallelModel.validateTopicsInterval         = labeledLDA.validateTopicsInterval;
-//
+        parallelModel.data                              = labeledLDA.data;
+        parallelModel.alphabet                          = labeledLDA.alphabet;
+        parallelModel.numTypes                          = labeledLDA.numTypes;
+        parallelModel.betaSum                           = labeledLDA.betaSum;
+        parallelModel.numTopics                         = labeledLDA.numTopics;
+        parallelModel.stoplist                          = labeledLDA.stoplist;
+        parallelModel.tokensPerTopic                    = labeledLDA.tokensPerTopic;
+        parallelModel.typeTopicCounts                   = labeledLDA.typeTopicCounts;
+        parallelModel.maxRetries                        = labeledLDA.maxRetries;
+        parallelModel.numIterations                     = labeledLDA.numIterations;
+        parallelModel.showTopicsInterval                = labeledLDA.showTopicsInterval;
+        parallelModel.wordsPerTopic                     = labeledLDA.wordsPerTopic;
+        parallelModel.validateTopicsInterval            = labeledLDA.validateTopicsInterval;
+        parallelModel.randomSeed                        = parameters.getSeed();
+
         LabelAlphabet labelAlphabet = new LabelAlphabet();
         for(int i=0; i<labeledLDA.labelAlphabet.size();i++){
             labelAlphabet.lookupIndex(labeledLDA.labelAlphabet.lookupObject(i),true);
@@ -156,12 +153,7 @@ public class LabeledLDALauncher {
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords, instances.getPipe());
 
-        try {
-            inferencePoolManager.update(labeledLDA.getAlphabet(), instances.getPipe());
-        } catch (Exception e) {
-            LOG.error("Unexpected error creating inference for a new model",e);
-        }
-
+        mailBuilder.newMailTo(email);
 
         LOG.info(" Model created and saved successfully");
 
