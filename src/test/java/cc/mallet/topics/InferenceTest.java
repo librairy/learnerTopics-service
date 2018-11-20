@@ -118,7 +118,7 @@ public class InferenceTest {
 
         String corpusPath = "/Users/cbadenes/Projects/librairy/public/learnerTopics-service/output/bows.csv.gz";
 
-        InstanceList instances = instanceBuilder.getInstances(corpusPath, "(.*);;(.*);;(.*);;(.*)", 4, 3, 1, true, pos, 0, 1.0,false);
+        InstanceList instances = instanceBuilder.getInstances(corpusPath, "(.*);;(.*);;(.*);;(.*)", 4, 3, 1, true, pos, 0, 1.0,false, Collections.emptyList());
 
         File iFile = new File("src/test/bin/model/instances.data");
         if (iFile.exists()) iFile.delete();
