@@ -120,22 +120,25 @@ public class CorpusService {
             LOG.warn("Document is empty: " + document.getId());
             return;
         }
-        pendingDocs.incrementAndGet();
-        StringBuilder row = new StringBuilder();
-        row.append(document.getId()).append(SEPARATOR);
-        row.append(escaper.escape(document.getName())).append(SEPARATOR);
-        String labels = document.getLabels().stream().collect(Collectors.joining(" "));
-        if (Strings.isNullOrEmpty(labels)) labels = "default";
-        row.append(labels).append(SEPARATOR);
-        updateLanguage(document.getText());
-        // bow from nlp-service
-        String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Collections.emptyList(), multigrams));
-        row.append(text);
-        updated = TimeService.now();
-        if (isClosed) initialize();
-        write(row.toString()+"\n");
-        LOG.info("Added document: [" + document.getId() + " | " + document.getName() + "] to corpus");
-        pendingDocs.decrementAndGet();
+        try{
+            pendingDocs.incrementAndGet();
+            StringBuilder row = new StringBuilder();
+            row.append(document.getId()).append(SEPARATOR);
+            row.append(escaper.escape(document.getName())).append(SEPARATOR);
+            String labels = document.getLabels().stream().collect(Collectors.joining(" "));
+            if (Strings.isNullOrEmpty(labels)) labels = "default";
+            row.append(labels).append(SEPARATOR);
+            updateLanguage(document.getText());
+            // bow from nlp-service
+            String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Collections.emptyList(), multigrams));
+            row.append(text);
+            updated = TimeService.now();
+            if (isClosed) initialize();
+            write(row.toString()+"\n");
+            LOG.info("Added document: [" + document.getId() + " | " + document.getName() + "] to corpus");
+        }finally{
+            pendingDocs.decrementAndGet();
+        }
     }
 
     private synchronized void write(String text){
@@ -179,8 +182,7 @@ public class CorpusService {
         LOG.info("Loading an existing corpus..");
         try{
             BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath.toFile()))));
-            updateLanguage(reader.readLine());
-            counter.set(Long.valueOf(reader.lines().count()).intValue()+1);
+            counter.set(Long.valueOf(reader.lines().count()).intValue());
             updated = TimeService.from(filePath.toFile().lastModified());
             reader.close();
             return true;
@@ -224,10 +226,10 @@ public class CorpusService {
         setClosed(true);
         if (writer != null){
             try{
-                writer.flush();
+//                writer.flush();
                 writer.close();
             }catch (IOException e){
-                LOG.debug("Writer closing error",e);
+                LOG.error("Writer closing error",e);
             }
         }
         LOG.info("Corpus closed");
