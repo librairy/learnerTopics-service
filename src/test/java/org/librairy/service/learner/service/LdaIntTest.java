@@ -8,8 +8,8 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.librairy.service.learner.Application;
-import org.librairy.service.learner.builders.JensenShannon;
-import org.librairy.service.learner.builders.Stats;
+import org.librairy.service.learner.metric.JensenShannon;
+import org.librairy.service.learner.metric.Stats;
 import org.librairy.service.learner.facade.model.Document;
 import org.librairy.service.learner.facade.model.LearnerService;
 import org.librairy.service.learner.utils.ReaderUtils;
@@ -68,8 +68,10 @@ public class LdaIntTest {
         AtomicInteger counter = new AtomicInteger();
         ObjectMapper jsonMapper = new ObjectMapper();
         List<Document> documents = new ArrayList<>();
+//        BufferedWriter w = WriterUtils.to("src/test/bin/model/doctopics3.csv.gz");
         boolean raw = false;
         boolean multigrams = true;
+//        Inferencer inferencer = inferencePoolManager.get(Thread.currentThread());
         while((row = reader.readLine()) != null){
             JsonNode json = jsonMapper.readTree(row);
             String id = json.get("id").asText();
@@ -77,27 +79,36 @@ public class LdaIntTest {
             if (Strings.isNullOrEmpty(text) || (Strings.isNullOrEmpty(text.replace("\n","").trim()))) continue;
             try {
                 Document document = Document.newBuilder().setId(id).setName(id).setText(text).build();
-//                LOG.info("Adding ["+text+"]");
                 learnerService.addDocument(document,multigrams,raw);
                 documents.add(document);
+//                List<Double> s = inferencer.inference(text);
+//                w.write(id+","+s.stream().map(ss->String.valueOf(ss)).collect(Collectors.joining(","))+"\n");
                 if (counter.incrementAndGet()>= max) break;
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+//        w.close();
         LOG.info(documents.size() + " documents added!");
         Map<String,String> parameters = new HashMap<>();
 
         parameters.put("topics","10");
         parameters.put("pos","NOUN VERB ADJECTIVE");
-        parameters.put("minfreq","1");
-        parameters.put("maxdocratio","0.95");
+        parameters.put("minfreq","5");
+        parameters.put("maxdocratio","0.8");
+        parameters.put("topwords","5");
         parameters.put("algorithm","lda");
         parameters.put("iterations","100");
         parameters.put("inference","true");
+        parameters.put("retries","0");
+        parameters.put("alpha","0.01");
+        parameters.put("beta","0.001");
+        parameters.put("stopwords","research project develop system");
         parameters.put("entities",String.valueOf(multigrams));
+        parameters.put("seed","1");
 
 
+//
         String result = learnerService.train(parameters);
 
         LOG.info("Result: " + result);
@@ -114,6 +125,8 @@ public class LdaIntTest {
 
         LOG.info("Topics: " + topics);
 
+//        LOG.info("Wait for results..");
+//        Thread.sleep(10000);
 
         Inferencer inferencer = inferencePoolManager.get(Thread.currentThread());
         BufferedReader dReader = ReaderUtils.from("src/test/bin/model/doctopics.csv.gz");
@@ -123,9 +136,10 @@ public class LdaIntTest {
             String[] values = r.split(",");
             String id = values[0];
             List<Double> v1 = Arrays.stream(values).skip(1).mapToDouble(i -> Double.valueOf(i)).boxed().collect(Collectors.toList());
-            String text = documents.stream().filter(d -> d.getId().equalsIgnoreCase(id)).collect(Collectors.toList()).get(0).getText();
+            List<Document> foundList = documents.stream().filter(d -> d.getId().equalsIgnoreCase(id)).collect(Collectors.toList());
+            if (foundList.isEmpty()) continue;
+            String text = foundList.get(0).getText();
             List<Double> v2 = inferencer.inference(text);
-
             if (v1.size() != v2.size()){
                 LOG.warn("Error size!!!");
             }
@@ -135,32 +149,15 @@ public class LdaIntTest {
             Double sim = JensenShannon.similarity(v1,v2);
 //            LOG.info("["+id+"] Similarity -> " + sim);
             similarities.add(sim);
-            if (sim < 0.98){
-                LOG.warn("["+sim+"] - " + text.replace("\n",""));
-            }
-        }
-        dReader.close();
-
-
-        inferencer = inferencePoolManager.get(Thread.currentThread());
-        dReader = ReaderUtils.from("src/test/bin/model/doctopics.csv.gz");
-
-        similarities = new ArrayList<>();
-        while((r = dReader.readLine()) != null){
-            String[] values = r.split(",");
-            String id = values[0];
-            List<Double> v1 = Arrays.stream(values).skip(1).mapToDouble(i -> Double.valueOf(i)).boxed().collect(Collectors.toList());
-            String text = documents.stream().filter(d -> d.getId().equalsIgnoreCase(id)).collect(Collectors.toList()).get(0).getText();
-            List<Double> v2 = inferencer.inference(text);
-//            LOG.info("["+id+"] Text -> " + text.replace("\n",""));
-//            LOG.info("["+id+"] Training Vector -> " + v1);
-//            LOG.info("["+id+"] Inference Vector -> " + v2);
-            Double sim = JensenShannon.similarity(v1,v2);
-//            LOG.info("["+id+"] Similarity -> " + sim);
-            similarities.add(sim);
-            if (sim < 0.98){
-                LOG.warn("["+sim+"] - " + text.replace("\n",""));
-            }
+//            if (sim < 0.99){
+//                LOG.warn("["+sim+"] - " + id);
+//                List<Double> v3 = inferencer.inference(text);
+//                LOG.warn("\t["+JensenShannon.similarity(v2,v3)+"] - " + id);
+//
+//            }
+//            else{
+//                LOG.info("["+sim+"] - " + id);
+//            }
         }
         dReader.close();
 
@@ -195,7 +192,7 @@ public class LdaIntTest {
 
         Map<String,String> parameters = new HashMap<>();
 
-        parameters.put("topics","2");
+        parameters.put("topics","8");
         parameters.put("pos","NOUN VERB ADJECTIVE");
         parameters.put("minfreq","1");
         parameters.put("maxdocratio","0.95");
