@@ -69,6 +69,7 @@ public class TrainingPoolManager {
                 if (parameters.containsKey("inference"))    ldaParameters.setInference(Boolean.valueOf(parameters.get("inference")));
                 if (parameters.containsKey("multigrams"))   ldaParameters.setEntities(Boolean.valueOf(parameters.get("multigrams")));
                 if (parameters.containsKey("entities"))     ldaParameters.setEntities(Boolean.valueOf(parameters.get("entities")));
+                if (parameters.containsKey("seed"))         ldaParameters.setSeed(Integer.valueOf(parameters.get("seed")));
 
                 modelFactory.train(parameters,ldaParameters);
             } catch (IOException e) {
@@ -80,7 +81,6 @@ public class TrainingPoolManager {
             }finally {
                 isTraining = false;
             }
-
         });
 
         return true;
