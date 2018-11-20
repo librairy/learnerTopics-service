@@ -131,7 +131,6 @@ public class CorpusService {
         row.append(labels).append(SEPARATOR);
         updateLanguage(document.getText());
         // bow from nlp-service
-        //String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Arrays.asList(new PoS[]{PoS.NOUN, PoS.VERB, PoS.ADJECTIVE}), multigrams));
         String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Collections.emptyList(), multigrams));
         row.append(text);
         updated = TimeService.now();
