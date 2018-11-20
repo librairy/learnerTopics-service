@@ -10,12 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Map;
-import java.util.zip.GZIPOutputStream;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -37,9 +36,6 @@ public class LDALauncher {
     @Autowired
     MailBuilder mailBuilder;
 
-    @Autowired
-    InferencePoolManager inferencePoolManager;
-
 
     public void train(ModelParams parameters, String email) throws IOException {
 
@@ -54,6 +50,7 @@ public class LDALauncher {
         String pos          = parameters.getPos();
         Integer maxRetries  = parameters.getNumRetries();
         Boolean raw         = parameters.getRaw();
+        Integer seed        = parameters.getSeed();
 
 
 
@@ -62,7 +59,7 @@ public class LDALauncher {
 
         Instant startProcess = Instant.now();
 
-        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), false, pos, parameters.getMinFreq(), parameters.getMaxDocRatio(),raw);
+        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), false, pos, parameters.getMinFreq(), parameters.getMaxDocRatio(),raw, parameters.getStopwords());
 
         int numWords = instances.getDataAlphabet().size();
         if ( numWords <= 10){
@@ -72,13 +69,11 @@ public class LDALauncher {
 
         ParallelTopicModel model = new ParallelTopicModel(numTopics, numTopics*alpha, beta);
 
-        parameters.getStopwords().forEach(word -> model.addStop(word));
-
-        model.addInstances(instances);
-
-//        model.setRandomSeed(-1);
+        model.setRandomSeed(seed);
+        model.setSymmetricAlpha(true);
 
         int size = instances.size();
+        model.addInstances(instances);
         Instant endProcess = Instant.now();
         String durationProcess = ChronoUnit.HOURS.between(startProcess, endProcess) + "hours "
                 + ChronoUnit.MINUTES.between(startProcess, endProcess) % 60 + "min "
@@ -96,9 +91,6 @@ public class LDALauncher {
         // Disable print loglikelihood. (use for testing purposes)
         model.printLogLikelihood = false;
 
-        // Run the model for 50 iterations and stop (this is for testing only,
-        //  for real applications, use 1000 to 2000 iterations)
-
         Integer optimizeInterval = numIterations/2;
         model.setOptimizeInterval(optimizeInterval);
         LOG.info("Optimize Interval: " + optimizeInterval);
@@ -106,7 +98,6 @@ public class LDALauncher {
         Integer intervalTopicDisplay = numIterations/2;
         model.setTopicDisplay(intervalTopicDisplay,5);
         LOG.info("Interval Topic Display: " + intervalTopicDisplay);
-
 
         Integer intervalTopicValidation = numIterations/2;
         model.setTopicValidation(intervalTopicValidation,10);
@@ -132,15 +123,8 @@ public class LDALauncher {
 
         mailBuilder.newMailTo(email);
 
-        try {
-            inferencePoolManager.update(model.getAlphabet(), instances.getPipe());
-        } catch (Exception e) {
-            LOG.error("Unexpected error creating inference for a new model",e);
-        }
-
         LOG.info(" Model created and saved successfully");
 
     }
-
 
 }
