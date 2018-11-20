@@ -106,7 +106,9 @@ public class BoWPipeBuilder implements PipeBuilderI{
         /**
          *
          */
-        Iterator<Instance> iterator = pipe.newParallelIteratorFrom(cvsIterator);
+        //Iterator<Instance> iterator = pipe.newParallelIteratorFrom(cvsIterator);
+
+        Iterator<Instance> iterator = pipe.newIteratorFrom(cvsIterator);
 
         ParallelExecutor executors = new ParallelExecutor();
 
