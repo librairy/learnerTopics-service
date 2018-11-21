@@ -26,8 +26,10 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -165,7 +167,11 @@ public class CorpusService {
 
         if (!load()){
             LOG.info("Initialized an empty corpus..");
-            filePath.toFile().getParentFile().mkdirs();
+//            filePath.toFile().getParentFile().mkdirs();
+            Files.createDirectory(filePath.getParent(),
+                    PosixFilePermissions.asFileAttribute(
+                            PosixFilePermissions.fromString("rwxrwxrwx")
+                    ));
             language = null;
         }
 

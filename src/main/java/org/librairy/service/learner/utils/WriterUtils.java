@@ -4,6 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -17,7 +20,13 @@ public class WriterUtils {
     public static BufferedWriter to(String path) throws IOException {
         File out = new File(path);
         if (out.exists()) out.delete();
-        else out.getParentFile().mkdirs();
+        else {
+//            out.getParentFile().mkdirs();
+            Files.createDirectory(Paths.get(path).getParent(),
+                    PosixFilePermissions.asFileAttribute(
+                            PosixFilePermissions.fromString("rwxrwxrwx")
+                    ));
+        }
         return new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(path))));
     }
 

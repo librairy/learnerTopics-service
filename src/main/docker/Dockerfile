@@ -5,7 +5,8 @@ RUN  \
   apk add docker && \
   apk add openrc && \
   rc-update add docker boot
-
+WORKDIR /librairy
+RUN chmod 777 /librairy
 VOLUME /tmp
 VOLUME /librairy
 ADD learner-topics-service.jar /app.jar

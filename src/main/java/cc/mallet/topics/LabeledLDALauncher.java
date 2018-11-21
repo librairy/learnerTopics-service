@@ -15,7 +15,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Map;
@@ -44,7 +46,13 @@ public class LabeledLDALauncher {
     public void train(ModelParams parameters, String email) throws IOException {
 
         File outputDirFile = Paths.get(parameters.getOutputDir()).toFile();
-        if (!outputDirFile.exists()) outputDirFile.mkdirs();
+        if (!outputDirFile.exists()){
+//            outputDirFile.mkdirs();
+            Files.createDirectory(Paths.get(parameters.getOutputDir()),
+                    PosixFilePermissions.asFileAttribute(
+                            PosixFilePermissions.fromString("rwxrwxrwx")
+                    ));
+        }
 
         Double alpha        = parameters.getAlpha();
         Double beta         = parameters.getBeta();

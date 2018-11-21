@@ -12,7 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
@@ -40,7 +42,13 @@ public class LDALauncher {
     public void train(ModelParams parameters, String email) throws IOException {
 
         File outputDirFile = Paths.get(parameters.getOutputDir()).toFile();
-        if (!outputDirFile.exists()) outputDirFile.mkdirs();
+        if (!outputDirFile.exists()) {
+//            outputDirFile.mkdirs();
+            Files.createDirectory(Paths.get(parameters.getOutputDir()),
+                    PosixFilePermissions.asFileAttribute(
+                            PosixFilePermissions.fromString("rwxrwxrwx")
+                    ));
+        }
 
         int numTopics       = parameters.getNumTopics();
         Double alpha        = parameters.getAlpha();
