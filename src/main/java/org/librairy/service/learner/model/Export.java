@@ -21,6 +21,10 @@ public class Export {
 
     private String licenseUrl   = "https://www.apache.org/licenses/LICENSE-2.0";
 
+    private Boolean pushDockerHub   = true;
+
+    private Boolean removeAfterPush = false;
+
     public Export() {
     }
 
@@ -86,5 +90,21 @@ public class Export {
 
     public void setLicenseUrl(String licenseUrl) {
         this.licenseUrl = licenseUrl;
+    }
+
+    public Boolean getPushDockerHub() {
+        return pushDockerHub;
+    }
+
+    public void setPushDockerHub(Boolean pushDockerHub) {
+        this.pushDockerHub = pushDockerHub;
+    }
+
+    public Boolean getRemoveAfterPush() {
+        return removeAfterPush;
+    }
+
+    public void setRemoveAfterPush(Boolean removeAfterPush) {
+        this.removeAfterPush = removeAfterPush;
     }
 }

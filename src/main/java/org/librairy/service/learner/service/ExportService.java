@@ -156,16 +156,11 @@ public class ExportService {
 
         final AtomicReference<String> imageIdFromMessage = new AtomicReference<>();
 
-        dockerClient.pull("librairy/modeler-topics-service");
-
         final String returnedImageId = dockerClient.build(
-                Paths.get(resourceFolder).getParent(), imageName, new ProgressHandler() {
-                    @Override
-                    public void progress(ProgressMessage message) throws DockerException {
-                        final String imageId = message.buildImageId();
-                        if (imageId != null) {
-                            imageIdFromMessage.set(imageId);
-                        }
+                Paths.get(resourceFolder).getParent(), imageName, message -> {
+                    final String imageId = message.buildImageId();
+                    if (imageId != null) {
+                        imageIdFromMessage.set(imageId);
                     }
                 });
 
@@ -174,28 +169,32 @@ public class ExportService {
 
         if (Strings.isNullOrEmpty(returnedImageId)) return false;
 
-//            dockerClient.push(export.getCredentials().getRepository());
 
-        dockerExecutor.submit(new Runnable() {
-            @Override
-            public void run() {
+        if (export.getPushDockerHub()){
+            dockerExecutor.submit(() -> {
                 try {
                     final AnsiProgressHandler ansiProgressHandler = new AnsiProgressHandler();
                     final DigestExtractingProgressHandler handler = new DigestExtractingProgressHandler(ansiProgressHandler);
                     try {
-                        LOG.info("Pushing " + imageName);
+                        LOG.info("Pushing " + imageName + " to DockerHub");
                         dockerClient.push(imageName, handler, credentials);
                     } catch (Exception e) {
                         LOG.error("Error on push: ", e);
                     }
 
-                    dockerClient.removeImage(imageName);
+                    if (export.getRemoveAfterPush()){
+                        LOG.info("Removing docker image from local repository");
+                        dockerClient.removeImage(imageName);
+                    }
 
                 } catch (Exception e) {
                     LOG.warn("Error pushing docker image", e);
                 }
-            }
-        });
+            });
+        }
+
+
+
         return true;
     }
 
