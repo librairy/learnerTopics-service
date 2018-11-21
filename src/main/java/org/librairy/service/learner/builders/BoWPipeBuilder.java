@@ -127,8 +127,6 @@ public class BoWPipeBuilder implements PipeBuilderI{
                     try {
                         Instance instance = iterator.next();
                         LOG.debug("Instance: " + instance.getName());
-                    }catch (ArrayIndexOutOfBoundsException e){
-                        LOG.debug("index limit",e);
                     }catch (NoSuchElementException e){
                         LOG.info("list completed");
                     }catch (Exception e){
