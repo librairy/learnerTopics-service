@@ -167,7 +167,10 @@ public class ExportService {
         LOG.info("Image ID: " + returnedImageId);
 
 
-        if (Strings.isNullOrEmpty(returnedImageId)) return false;
+        if (Strings.isNullOrEmpty(returnedImageId)) {
+            LOG.warn("Image not created");
+            return false;
+        }
 
 
         if (export.getPushDockerHub()){
@@ -193,6 +196,7 @@ public class ExportService {
             });
         }
 
+        LOG.info("Docker Image created successfully");
 
 
         return true;

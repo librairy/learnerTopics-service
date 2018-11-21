@@ -107,4 +107,20 @@ public class Export {
     public void setRemoveAfterPush(Boolean removeAfterPush) {
         this.removeAfterPush = removeAfterPush;
     }
+
+    @Override
+    public String toString() {
+        return "Export{" +
+                "credentials=" + credentials +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", contactName='" + contactName + '\'' +
+                ", contactEmail='" + contactEmail + '\'' +
+                ", contactUrl='" + contactUrl + '\'' +
+                ", licenseName='" + licenseName + '\'' +
+                ", licenseUrl='" + licenseUrl + '\'' +
+                ", pushDockerHub=" + pushDockerHub +
+                ", removeAfterPush=" + removeAfterPush +
+                '}';
+    }
 }
