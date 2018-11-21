@@ -47,11 +47,7 @@ public class LabeledLDALauncher {
 
         File outputDirFile = Paths.get(parameters.getOutputDir()).toFile();
         if (!outputDirFile.exists()){
-//            outputDirFile.mkdirs();
-            Files.createDirectory(Paths.get(parameters.getOutputDir()),
-                    PosixFilePermissions.asFileAttribute(
-                            PosixFilePermissions.fromString("rwxrwxrwx")
-                    ));
+            outputDirFile.mkdirs();
         }
 
         Double alpha        = parameters.getAlpha();

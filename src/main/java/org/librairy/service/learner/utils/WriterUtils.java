@@ -21,11 +21,7 @@ public class WriterUtils {
         File out = new File(path);
         if (out.exists()) out.delete();
         else {
-//            out.getParentFile().mkdirs();
-            Files.createDirectory(Paths.get(path).getParent(),
-                    PosixFilePermissions.asFileAttribute(
-                            PosixFilePermissions.fromString("rwxrwxrwx")
-                    ));
+            out.getParentFile().mkdirs();
         }
         return new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(path))));
     }
