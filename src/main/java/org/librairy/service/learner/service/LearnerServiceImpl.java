@@ -77,21 +77,11 @@ public class LearnerServiceImpl implements LearnerService {
     @Override
     public String train(Map<String, String> map) throws AvroRemoteException {
 
-        try {
-            corpusService.close();
-            corpusService.load();
-            topicsService.remove();
-            if (corpusService.getNumDocs() <= 0 ){
-                LOG.info("Corpus is empty.");
-                return "Corpus is empty";
-            }
-        } catch (IOException e) {
-            throw new AvroRemoteException("IO Error",e);
-        }
-
         LOG.info("Training a new model from parameters: " + map + " with a corpus of " + corpusService.getNumDocs() + " docs");
-        if (trainingPoolManager.train(map))
+        if (trainingPoolManager.train(map)){
+            topicsService.remove();
             return "building a new model";
+        }
         else return "There is currently a model training";
     }
 

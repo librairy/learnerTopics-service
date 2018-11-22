@@ -2,6 +2,7 @@ package org.librairy.service.learner.service;
 
 import cc.mallet.topics.ModelFactory;
 import cc.mallet.topics.ModelParams;
+import org.apache.avro.AvroRemoteException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,10 +49,21 @@ public class TrainingPoolManager {
         if (isTraining) return false;
 
         executors.submit(() -> {
-            LOG.info("ready to create a new topic model from: " + parameters);
+
             isTraining = true;
 
             try {
+
+                LOG.info("waiting to have all documents indexed..");
+                corpusService.close();
+                corpusService.load();
+                if (corpusService.getNumDocs() <= 0 ){
+                    LOG.info("Corpus is empty.");
+                    return;
+                }
+
+
+                LOG.info("ready to create a new topic model from: " + parameters);
                 ModelParams ldaParameters = new ModelParams(corpusService.getFilePath().toFile().getAbsolutePath(), resourceFolder);
 
                 if (parameters.containsKey("alpha"))        ldaParameters.setAlpha(Double.valueOf(parameters.get("alpha")));
@@ -82,8 +94,6 @@ public class TrainingPoolManager {
                 isTraining = false;
             }
         });
-
         return true;
     }
-
 }
