@@ -1,5 +1,5 @@
 FROM registry.bdlab.minetur.es/modeler-topics-service:latest
-ADD model /bin/
+ADD model/model* /bin/
 ENV SWAGGER_TITLE="$title"
 ENV SWAGGER_DESCRIPTION="$description"
 ENV SWAGGER_CONTACT_NAME="$contactName"
