@@ -7,21 +7,21 @@ import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import org.librairy.service.learner.executors.ParallelExecutor;
 import org.librairy.service.learner.model.Reader;
-import org.librairy.service.learner.service.CorpusService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -35,8 +35,8 @@ public class InstanceBuilder {
     @Value("#{environment['resource.folder']?:'${resource.folder}'}")
     String resourceFolder;
 
-    @Autowired
-    CorpusService corpusService;
+//    @Autowired
+//    CorpusBuilder corpusService;
 
     /**
      *
@@ -51,9 +51,7 @@ public class InstanceBuilder {
      * @param maxDocRatio Remove words that occur in more than (X*100)% of documents. 0.05 is equivalent to IDF of 3.0.
      * @return
      */
-    public InstanceList getInstances(String filePath, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos, Integer minFreq, Double maxDocRatio, Boolean raw, List<String> stopwords) throws IOException {
-
-        Integer size = corpusService.getNumDocs();
+    public InstanceList getInstances(String filePath, Integer size, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos, Integer minFreq, Double maxDocRatio, Boolean raw, List<String> stopwords) throws IOException {
 
         PipeBuilderI pipeBuilder = PipeBuilderFactory.newInstance(size, raw);
 

@@ -4,12 +4,10 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.apache.avro.AvroRemoteException;
-import org.librairy.service.learner.facade.model.LearnerService;
-import org.librairy.service.learner.facade.rest.model.ModelParameters;
+import org.librairy.service.learner.builders.DateBuilder;
 import org.librairy.service.learner.facade.rest.model.Result;
-import org.librairy.service.modeler.controllers.RestTopicsController;
-import org.librairy.service.modeler.facade.model.ModelerService;
+import org.librairy.service.learner.facade.rest.model.TopicsRequest;
+import org.librairy.service.learner.service.QueueService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +24,12 @@ import javax.annotation.PreDestroy;
 @RestController
 @RequestMapping("/topics")
 @Api(tags="/topics", description = "topics management")
-public class LearnerRestTopicsController extends RestTopicsController {
+public class LearnerRestTopicsController {
 
     private static final Logger LOG = LoggerFactory.getLogger(LearnerRestTopicsController.class);
 
     @Autowired
-    ModelerService modelerService;
-
-    @Autowired
-    LearnerService learnerService;
+    QueueService queueService;
 
     @PostConstruct
     public void setup(){
@@ -52,14 +47,15 @@ public class LearnerRestTopicsController extends RestTopicsController {
             @ApiResponse(code = 202, message = "Accepted", response = String.class),
     })
     @RequestMapping(method = RequestMethod.POST, consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Result> train(@RequestBody ModelParameters request)  {
+    public ResponseEntity<Result> create(@RequestBody TopicsRequest request)  {
+        String date = DateBuilder.now();
         try {
-            return new ResponseEntity(new Result(learnerService.train(request.getParameters())), HttpStatus.ACCEPTED);
-        } catch (AvroRemoteException e) {
-            return new ResponseEntity(new Result("internal service seems down"),HttpStatus.FAILED_DEPENDENCY);
+            // train a new model from datasource
+            queueService.addTopicsRequest(request);
+            return new ResponseEntity(new Result(date,"QUEUED","Task created"), HttpStatus.ACCEPTED);
         } catch (Exception e) {
             LOG.error("IO Error", e);
-            return new ResponseEntity(new Result("IO error"),HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity(new Result(date, "REJECTED", "IO error"),HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

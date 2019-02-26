@@ -20,10 +20,12 @@ import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
+import org.librairy.service.learner.facade.model.TopicsRequest;
 import org.librairy.service.learner.model.DockerHubCredentials;
 import org.librairy.service.learner.model.Export;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -52,6 +54,33 @@ public class ExportService {
     @Value("#{environment['RESOURCE_FOLDER']?:'${resource.folder}'}")
     String resourceFolder;
 
+    @Value("#{environment['CONTACT_NAME']?:'${swagger.contact.name}'}")
+    String contactName;
+
+    @Value("#{environment['CONTACT_URL']?:'${swagger.contact.url}'}")
+    String contactUrl;
+
+    @Value("#{environment['LICENSE_NAME']?:'${swagger.license.name}'}")
+    String licenseName;
+
+    @Value("#{environment['LICENSE_URL']?:'${swagger.license.url}'}")
+    String licenseUrl;
+
+    @Value("#{environment['DOCKER_EMAIL']?:'${docker.email}'}")
+    String dockerEmail;
+
+    @Value("#{environment['DOCKER_USER']?:'${docker.user}'}")
+    String dockerUser;
+
+    @Value("#{environment['DOCKER_PWD']?:'${docker.pwd}'}")
+    String dockerPwd;
+
+    @Value("#{environment['DOCKER_PWD']?:'${docker.repo}'}")
+    String dockerRepo;
+
+    @Autowired
+    MailService mailService;
+
     @PostConstruct
     public void setup() throws IOException {
 
@@ -66,7 +95,34 @@ public class ExportService {
     }
 
 
-    public boolean request(Export export) throws Exception {
+    public boolean request(TopicsRequest request) throws Exception {
+
+        String email        = request.getContactEmail();
+        String name         = request.getName();
+        String description  = request.getDescription();
+
+        Export export = new Export();
+        export.setContactEmail(email);
+        export.setContactName(contactName);
+        export.setContactUrl(contactUrl);
+        export.setRemoveAfterPush(true);
+        export.setPushDockerHub(true);
+
+        DockerHubCredentials dockerCredentials = new DockerHubCredentials();
+        dockerCredentials.setEmail(dockerEmail);
+        dockerCredentials.setUsername(dockerUser);
+        dockerCredentials.setPassword(dockerPwd);
+        String repoName = dockerRepo+"/"+name.replaceAll("\\W+", "-")+":"+request.getVersion();
+        dockerCredentials.setRepository(repoName);
+        export.setCredentials(dockerCredentials);
+
+        export.setTitle(name);
+        export.setDescription(description);
+
+        export.setLicenseName(licenseName);
+        export.setLicenseUrl(licenseUrl);
+
+
         RegistryAuth credentials = new RegistryAuth() {
             @Override
             public String username() {
@@ -169,6 +225,7 @@ public class ExportService {
 
         if (Strings.isNullOrEmpty(returnedImageId)) {
             LOG.warn("Image not created");
+            mailService.notifyError(request, "Docker image not created");
             return false;
         }
 
@@ -183,7 +240,11 @@ public class ExportService {
                         dockerClient.push(imageName, handler, credentials);
                     } catch (Exception e) {
                         LOG.error("Error on push: ", e);
+                        mailService.notifyError(request, "Docker image not uploaded to DockerHub");
                     }
+
+                    LOG.info("Docker Image created successfully");
+                    mailService.notifyCreation(request, "Docker image created successfully: " + dockerCredentials.getRepository());
 
                     if (export.getRemoveAfterPush()){
                         LOG.info("Removing docker image from local repository");
@@ -192,11 +253,11 @@ public class ExportService {
 
                 } catch (Exception e) {
                     LOG.warn("Error pushing docker image", e);
+                    mailService.notifyError(request, "Connection error to Docker Hub");
                 }
             });
         }
 
-        LOG.info("Docker Image created successfully");
 
 
         return true;

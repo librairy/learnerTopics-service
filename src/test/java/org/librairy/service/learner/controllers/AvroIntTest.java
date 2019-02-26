@@ -5,7 +5,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.librairy.service.learner.Application;
 import org.librairy.service.learner.facade.AvroClient;
-import org.librairy.service.learner.facade.model.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,8 +31,6 @@ public class AvroIntTest {
 
         client.open(host,port);
 
-        client.addDocument(Document.newBuilder().setId("doc1").setText("sample text").build(),false,false);
-        client.reset();
 
         client.close();
     }

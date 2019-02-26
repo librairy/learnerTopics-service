@@ -58,6 +58,7 @@ public class LabeledLDALauncher {
         Integer maxRetries  = parameters.getNumRetries();
         Boolean raw         = parameters.getRaw();
         Integer seed        = parameters.getSeed();
+        Integer corpusSize  = parameters.getSize();
 
 
         LabeledLDA labeledLDA = new LabeledLDA(alpha, beta);
@@ -66,7 +67,7 @@ public class LabeledLDALauncher {
 
         Instant startProcess = Instant.now();
 
-        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), true, pos, parameters.getMinFreq(), parameters.getMaxDocRatio(),raw, parameters.getStopwords());
+        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), corpusSize , parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), true, pos, parameters.getMinFreq(), parameters.getMaxDocRatio(),raw, parameters.getStopwords());
 
         int numWords = instances.getDataAlphabet().size();
         if ( numWords <= 10){
@@ -157,7 +158,9 @@ public class LabeledLDALauncher {
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), "llda",parameters, parallelModel, numTopWords, instances.getPipe());
 
-        mailBuilder.newMailTo(email);
+
+        //TODO check topic service
+        mailBuilder.newMailTo(email, new TopicsService());
 
         LOG.info(" Model created and saved successfully");
 

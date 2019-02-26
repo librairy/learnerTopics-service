@@ -5,7 +5,6 @@ import org.librairy.service.modeler.facade.model.Settings;
 import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -32,10 +31,7 @@ public class MailBuilder {
     String emailPwd;
 
 
-    @Autowired
-    TopicsService topicsService;
-
-    public void newMailTo(String dest){
+    public void newMailTo(String dest, TopicsService topicsService){
         if (Strings.isNullOrEmpty(dest)) return;
 
         LOG.info("sending an email with report .. ");

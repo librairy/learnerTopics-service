@@ -4,6 +4,7 @@ import cc.mallet.types.InstanceList;
 import org.librairy.service.learner.builders.InstanceBuilder;
 import org.librairy.service.learner.builders.MailBuilder;
 import org.librairy.service.modeler.service.InferencePoolManager;
+import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,7 @@ public class LDALauncher {
         Integer maxRetries  = parameters.getNumRetries();
         Boolean raw         = parameters.getRaw();
         Integer seed        = parameters.getSeed();
+        Integer corpusSize  = parameters.getSize();
 
 
 
@@ -63,7 +65,7 @@ public class LDALauncher {
 
         Instant startProcess = Instant.now();
 
-        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), false, pos, parameters.getMinFreq(), parameters.getMaxDocRatio(),raw, parameters.getStopwords());
+        InstanceList instances = instanceBuilder.getInstances(parameters.getCorpusFile(), corpusSize, parameters.getRegEx(), parameters.getTextIndex(), parameters.getLabelIndex(), parameters.getIdIndex(), false, pos, parameters.getMinFreq(), parameters.getMaxDocRatio(),raw, parameters.getStopwords());
 
         int numWords = instances.getDataAlphabet().size();
         if ( numWords <= 10){
@@ -125,7 +127,8 @@ public class LDALauncher {
         LOG.info("saving model to disk .. ");
         modelLauncher.saveModel(parameters.getOutputDir(), "lda", parameters, model, numTopWords, instances.getPipe());
 
-        mailBuilder.newMailTo(email);
+        // TODO check topics service
+        mailBuilder.newMailTo(email, new TopicsService());
 
         LOG.info(" Model created and saved successfully");
 

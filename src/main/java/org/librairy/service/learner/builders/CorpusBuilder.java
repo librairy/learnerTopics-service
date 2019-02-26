@@ -1,4 +1,4 @@
-package org.librairy.service.learner.service;
+package org.librairy.service.learner.builders;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Strings;
@@ -14,23 +14,15 @@ import com.optimaize.langdetect.profiles.LanguageProfileReader;
 import com.optimaize.langdetect.text.CommonTextObjectFactories;
 import com.optimaize.langdetect.text.TextObject;
 import com.optimaize.langdetect.text.TextObjectFactory;
-import org.librairy.service.learner.facade.model.Document;
+import org.librairy.service.learner.model.Document;
 import org.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.librairy.service.modeler.service.BoWService;
+import org.librairy.service.nlp.facade.model.PoS;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
 import java.io.*;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
-import java.nio.file.attribute.PosixFilePermissions;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -40,15 +32,10 @@ import java.util.zip.GZIPOutputStream;
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
-@Component
-public class CorpusService {
+public class CorpusBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(CorpusService.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CorpusBuilder.class);
 
-    @Value("#{environment['OUTPUT_DIR']?:'${output.dir}'}")
-    String outputDir;
-
-    @Autowired
     LibrairyNlpClient librairyNlpClient;
 
     public static final String SEPARATOR = ";;";
@@ -76,9 +63,14 @@ public class CorpusService {
     private TextObjectFactory textObjectFactory;
 
 
-    @PostConstruct
-    public void setup() throws IOException {
+    public CorpusBuilder(Path filePath, LibrairyNlpClient librairyNlpClient) throws IOException {
+
+        this.filePath = filePath;
+
+        this.librairyNlpClient = librairyNlpClient;
+
         initialize();
+
         //load all languages:
         LanguageProfileReader langReader = new LanguageProfileReader();
 
@@ -105,7 +97,6 @@ public class CorpusService {
         this.textObjectFactory = CommonTextObjectFactories.forDetectingOnLargeText();
     }
 
-    @PreDestroy
     public void destroy() throws IOException {
         close();
     }
@@ -127,18 +118,18 @@ public class CorpusService {
             pendingDocs.incrementAndGet();
             StringBuilder row = new StringBuilder();
             row.append(document.getId()).append(SEPARATOR);
-            row.append(escaper.escape(document.getName())).append(SEPARATOR);
+            row.append(escaper.escape(document.getId())).append(SEPARATOR);
             String labels = document.getLabels().stream().collect(Collectors.joining(" "));
             if (Strings.isNullOrEmpty(labels)) labels = "default";
             row.append(labels).append(SEPARATOR);
             updateLanguage(document.getText());
             // bow from nlp-service
-            String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Collections.emptyList(), multigrams));
+            String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Arrays.asList(PoS.NOUN, PoS.VERB, PoS.ADJECTIVE), multigrams));
             row.append(text);
-            updated = TimeService.now();
+            updated = DateBuilder.now();
             if (isClosed) initialize();
             write(row.toString()+"\n");
-            LOG.info("Added document: [" + document.getId() + " | " + document.getName() + "] to corpus");
+            LOG.debug("Added document: [" + document.getId() +"] to corpus");
         }finally{
             pendingDocs.decrementAndGet();
         }
@@ -164,29 +155,28 @@ public class CorpusService {
     }
 
     public synchronized void initialize() throws IOException {
-        filePath = getFilePath();
 
         if (!load()){
             LOG.info("Initialized an empty corpus..");
             filePath.toFile().getParentFile().mkdirs();
             language = null;
+        }else{
+            LOG.info("corpus initialized with " + counter.get() + " documents");
         }
 
         writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
         setClosed(false);
-        LOG.info("corpus initialized with " + counter.get() + " documents");
     }
 
 
     public synchronized boolean load(){
-        filePath = getFilePath();
 
         if (!filePath.toFile().exists()) return false;
         LOG.info("Loading an existing corpus..");
         try{
             BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath.toFile()))));
             counter.set(Long.valueOf(reader.lines().count()).intValue());
-            updated = TimeService.from(filePath.toFile().lastModified());
+            updated = DateBuilder.from(filePath.toFile().lastModified());
             reader.close();
             return true;
         }catch (Exception e){
@@ -224,7 +214,7 @@ public class CorpusService {
             }
         }
 
-        LOG.info("Pending docs: " + pendingDocs.get());
+        if (pendingDocs.get() >0) LOG.info("Pending docs: " + pendingDocs.get());
 
         setClosed(true);
         if (writer != null){
@@ -242,8 +232,7 @@ public class CorpusService {
         this.isClosed = status;
     }
 
-    public Path getFilePath(){
-        return  Paths.get(outputDir, "bows.csv.gz");
+    public Path getFilePath() {
+        return filePath;
     }
-
 }

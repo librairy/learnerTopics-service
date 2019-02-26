@@ -1,4 +1,4 @@
-FROM registry.bdlab.minetur.es/modeler-topics-service:latest
+FROM librairy/modeler-topics-service:latest
 ADD model/model* /bin/
 ENV SWAGGER_TITLE="$title"
 ENV SWAGGER_DESCRIPTION="$description"

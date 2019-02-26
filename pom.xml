@@ -366,7 +366,7 @@ http://www.w3.org/2001/XMLSchema-instance ">
 			<plugin>
 				<groupId>com.spotify</groupId>
 				<artifactId>docker-maven-plugin</artifactId>
-				<version>0.4.11</version>
+				<version>0.4.11</version><!-- 0.4.11-->
 				<configuration>
 					<imageName>librairy/${project.build.finalName}</imageName>
 					<serverId>dockerhub</serverId>
