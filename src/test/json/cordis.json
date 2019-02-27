@@ -1,0 +1,23 @@
+{
+  "contactEmail": "cbadenes@fi.upm.es",
+  "description": "my model",
+  "from": {
+    "cache": false,
+    "fields": {
+      "id": "id",
+      "labels": [
+        "area"
+      ],
+      "text": [
+        "objective"
+      ]
+    },
+    "format": "JSONL_TAR_GZ",
+    "offset": 0,
+    "size": 25,
+    "url": "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/AZiWRo2n3KxrkLR/download"
+  },
+  "annotate":true,
+  "name": "cordis-test",
+  "version": "1.1"
+}

@@ -1,7 +1,7 @@
 FROM librairy/modeler-topics-service:latest
 ADD model/model* /bin/
-ENV SWAGGER_TITLE="cordis-test"
-ENV SWAGGER_DESCRIPTION="my model"
+ENV SWAGGER_TITLE="20newsgroup-model"
+ENV SWAGGER_DESCRIPTION="topic model created from 20newsgroup dataset"
 ENV SWAGGER_CONTACT_NAME="librAIry"
 ENV SWAGGER_CONTACT_EMAIL="cbadenes@fi.upm.es"
 ENV SWAGGER_CONTACT_URL="https://librairy.linkeddata.es"

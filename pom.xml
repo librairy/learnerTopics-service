@@ -40,12 +40,12 @@ http://www.w3.org/2001/XMLSchema-instance ">
 		<!-- Project Dependencies -->
 		<commons-lang3.version>3.5</commons-lang3.version>
 		<docker.version>8.7.1</docker.version>
+		<guava.version>23.0</guava.version>
 		<joda.version>2.9.9</joda.version>
 		<junit.version>4.12</junit.version>
 		<language-detector.version>0.6</language-detector.version>
 		<librairy.modeler.version>[1.0,)</librairy.modeler.version>
 		<librairy.learner.version>[1.0,)</librairy.learner.version>
-		<librairy.swagger.version>[0.3,)</librairy.swagger.version>
 		<logback.version>1.1.3</logback.version>
 		<mallet.version>2.0.8.1</mallet.version>
 		<mockito.version>1.9.5</mockito.version>
@@ -77,13 +77,6 @@ http://www.w3.org/2001/XMLSchema-instance ">
 				<groupId>org.librairy</groupId>
 				<artifactId>modeler-topics-service</artifactId>
 				<version>${librairy.modeler.version}</version>
-			</dependency>
-
-			<!-- librAIry Swagger -->
-			<dependency>
-				<groupId>org.librairy</groupId>
-				<artifactId>swagger</artifactId>
-				<version>${librairy.swagger.version}</version>
 			</dependency>
 
 			<!-- Mallet Dependency -->
@@ -170,6 +163,12 @@ http://www.w3.org/2001/XMLSchema-instance ">
 				<version>${spring.version}</version>
 			</dependency>
 
+			<dependency>
+				<groupId> com.google.guava</groupId>
+				<artifactId>guava</artifactId>
+				<version>${guava.version}</version>
+			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 
@@ -197,12 +196,6 @@ http://www.w3.org/2001/XMLSchema-instance ">
 					<artifactId>servlet-api</artifactId>
 				</exclusion>
 			</exclusions>
-		</dependency>
-
-		<!-- librAIry Swagger -->
-		<dependency>
-			<groupId>org.librairy</groupId>
-			<artifactId>swagger</artifactId>
 		</dependency>
 
 		<!-- Mallet Dependency -->
@@ -472,16 +465,6 @@ http://www.w3.org/2001/XMLSchema-instance ">
 			</snapshots>
 		</repository>
 
-
-		<!-- librAIry Swagger Repository -->
-		<repository>
-			<id>swagger</id>
-			<url>https://raw.github.com/librairy/swagger/mvn-repo/</url>
-			<snapshots>
-				<enabled>true</enabled>
-				<updatePolicy>always</updatePolicy>
-			</snapshots>
-		</repository>
 
 	</repositories>
 

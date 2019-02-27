@@ -1,13 +1,13 @@
 package org.librairy.service.learner.io;
 
+import com.google.common.base.Strings;
+import org.librairy.service.learner.facade.model.DataSource;
 import org.librairy.service.learner.model.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
@@ -16,32 +16,20 @@ import java.util.zip.GZIPInputStream;
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
-public class CSVReader implements Reader{
+public class CSVReader extends FileReader{
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVReader.class);
-    private final String separator;
-    private final String path;
-    private final Map<String, Integer> map;
-    private final String labelSeparator;
+    private String separator;
+    private Map<String, List<Integer>> map;
+    private String labelSeparator;
 
-    private BufferedReader reader;
-
-    public CSVReader(File csvFile, String separator, String labelSeparator, Map<String,Integer> map) throws IOException {
-        this.path = csvFile.getAbsolutePath();
-        this.reader = path.endsWith(".gz")?
-                new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(csvFile)))) :
-                new BufferedReader(new InputStreamReader(new FileInputStream(csvFile))) ;
-        this.separator = separator;
-        this.labelSeparator = labelSeparator;
-        this.map = map;
-    }
-
-    public CSVReader(InputStreamReader input,String separator, String labelSeparator, Map<String,Integer> map) throws IOException {
-        this.path   ="inputStream";
-        this.reader = new BufferedReader(input);
-        this.map    = map;
-        this.separator = separator;
-        this.labelSeparator = labelSeparator;
+    public CSVReader(DataSource dataSource, Boolean zip) throws IOException {
+        this.path           = "inputStream";
+        this.reader         = new BufferedReader(getInputStream(dataSource.getUrl(), zip));
+        this.map            = new HashMap<>();
+        getParameters(dataSource).entrySet().forEach(entry -> this.map.put(entry.getKey(), entry.getValue().stream().map(i -> Integer.valueOf(i)).collect(Collectors.toList())));
+        this.separator      = Strings.isNullOrEmpty(dataSource.getFilter())? "," : dataSource.getFilter();
+        this.labelSeparator = " ";
     }
 
     @Override
@@ -57,10 +45,30 @@ public class CSVReader implements Reader{
 
             Document document = new Document();
 
-            if (map.containsKey("id")) document.setId(values[map.get("id")].replaceAll("\\P{Print}", ""));
-            if (map.containsKey("text")) document.setText(values[map.get("text")].replaceAll("\\P{Print}", ""));
-            if (map.containsKey("labels"))
-                document.setLabels(Arrays.asList(values[map.get("labels")].split(labelSeparator)).stream().map(l -> l.replaceAll("\\P{Print}", "")).collect(Collectors.toList()));
+            if (map.containsKey("id")){
+                StringBuilder id = new StringBuilder();
+                for(Integer i : map.get("id")){
+                    id.append(format(values[i]));
+                }
+
+                document.setId(id.toString());
+            }
+            if (map.containsKey("text")) {
+                StringBuilder text = new StringBuilder();
+                for(Integer i : map.get("text")){
+                    text.append(format(values[i])).append(" ");
+                }
+
+                document.setText(text.toString());
+            }
+            if (map.containsKey("labels")){
+                StringBuilder labels = new StringBuilder();
+                for(Integer i : map.get("labels")){
+                    labels.append(format(values[i])).append(" ");
+                }
+
+                document.setLabels(Arrays.asList(labels.toString().split(labelSeparator)));
+            }
 
             return Optional.of(document);
         } catch (ArrayIndexOutOfBoundsException e){
@@ -72,21 +80,6 @@ public class CSVReader implements Reader{
         }
     }
 
-    @Override
-    public void offset(Integer numLines) {
-        if (numLines>0){
-            AtomicInteger counter = new AtomicInteger();
-            String line;
-            try{
-                while (((line = reader.readLine()) != null) && (counter.incrementAndGet() <= numLines)){
-                }
 
-            }catch (Exception e){
-                LOG.error("Unexpected error parsing file: " + path,e);
-            }
-
-
-        }
-    }
 
 }

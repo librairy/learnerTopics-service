@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -42,6 +43,8 @@ public class ModelService {
                 return false;
             }
 
+            corpus.close();
+
             LOG.info("ready to create a new topic model with parameters: " + parameters);
             ModelParams ldaParameters = new ModelParams(corpus.getFilePath().toFile().getAbsolutePath(), resourceFolder);
 
@@ -63,6 +66,11 @@ public class ModelService {
             if (parameters.containsKey("seed"))         ldaParameters.setSeed(Integer.valueOf(parameters.get("seed")));
 
             ldaParameters.setSize(corpus.getNumDocs());
+
+            if (!parameters.containsKey("algorithm")){
+                List<String> labels = request.getFrom().getFields().getLabels();
+                if (labels != null && !labels.isEmpty()) parameters.put("algorithm","llda");
+            }
 
             modelFactory.train(parameters,ldaParameters);
             return true;

@@ -50,6 +50,8 @@ public class LearnerRestTopicsController {
     public ResponseEntity<Result> create(@RequestBody TopicsRequest request)  {
         String date = DateBuilder.now();
         try {
+            if (!request.isValid()) return new ResponseEntity(new Result(date, "REJECTED", "Bad Request"),HttpStatus.BAD_REQUEST);
+
             // train a new model from datasource
             queueService.addTopicsRequest(request);
             return new ResponseEntity(new Result(date,"QUEUED","Task created"), HttpStatus.ACCEPTED);

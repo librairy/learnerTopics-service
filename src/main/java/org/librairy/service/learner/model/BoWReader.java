@@ -11,15 +11,15 @@ import java.io.IOException;
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
-public class Reader {
+public class BoWReader {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Reader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BoWReader.class);
 
     CsvIterator iterator;
 
     BufferedReader bufferedReader;
 
-    public Reader(CsvIterator iterator, BufferedReader bufferedReader) {
+    public BoWReader(CsvIterator iterator, BufferedReader bufferedReader) {
         this.iterator = iterator;
         this.bufferedReader = bufferedReader;
     }

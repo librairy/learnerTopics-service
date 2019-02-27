@@ -1,7 +1,7 @@
 package org.librairy.service.learner.builders;
 
 import cc.mallet.pipe.iterator.CsvIterator;
-import org.librairy.service.learner.model.Reader;
+import org.librairy.service.learner.model.BoWReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,12 +15,12 @@ import java.util.zip.GZIPInputStream;
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
-public class ReaderBuilder {
+public class BoWReaderBuilder {
 
-    private static final Logger LOG = LoggerFactory.getLogger(ReaderBuilder.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BoWReaderBuilder.class);
 
 
-    public Reader fromCSV(String filePath, String regEx, int textIndex, int labelIndex, int idIndex) throws IOException {
+    public BoWReader fromCSV(String filePath, String regEx, int textIndex, int labelIndex, int idIndex) throws IOException {
         int dataGroup           = textIndex;
         int targetGroup         = labelIndex;
         int uriGroup            = idIndex;
@@ -29,7 +29,7 @@ public class ReaderBuilder {
 
         CsvIterator csvIterator = new CsvIterator(reader, regEx, dataGroup, targetGroup, uriGroup);
 
-        return new Reader(csvIterator, reader);
+        return new BoWReader(csvIterator, reader);
 
     }
 

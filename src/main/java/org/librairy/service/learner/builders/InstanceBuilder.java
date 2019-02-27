@@ -6,7 +6,7 @@ import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
 import org.librairy.service.learner.executors.ParallelExecutor;
-import org.librairy.service.learner.model.Reader;
+import org.librairy.service.learner.model.BoWReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,14 +14,12 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -72,11 +70,11 @@ public class InstanceBuilder {
 
         if (minFreq > 0 || maxDocRatio < 1.0){
 
-            pipeBuilder.prune(new ReaderBuilder().fromCSV(filePath, regEx, textIndex, labelIndex, idIndex).getIterator(), tokenizer, pos, minFreq, maxDocRatio);
+            pipeBuilder.prune(new BoWReaderBuilder().fromCSV(filePath, regEx, textIndex, labelIndex, idIndex).getIterator(), tokenizer, pos, minFreq, maxDocRatio);
 
         }
 
-        Reader csvReader = new ReaderBuilder().fromCSV(filePath, regEx, textIndex, labelIndex, idIndex);
+        BoWReader csvReader = new BoWReaderBuilder().fromCSV(filePath, regEx, textIndex, labelIndex, idIndex);
 
         CsvIterator cvsIterator = csvReader.getIterator();
 

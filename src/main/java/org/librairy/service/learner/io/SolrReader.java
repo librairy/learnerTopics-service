@@ -1,5 +1,6 @@
 package org.librairy.service.learner.io;
 
+import org.librairy.service.learner.facade.model.DataSource;
 import org.librairy.service.learner.model.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,10 @@ import java.util.Optional;
 public class SolrReader implements Reader {
 
     private static final Logger LOG = LoggerFactory.getLogger(SolrReader.class);
+
+
+    public SolrReader(DataSource dataSource) {
+    }
 
     @Override
     public Optional<Document> next() {

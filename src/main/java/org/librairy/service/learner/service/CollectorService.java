@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -59,13 +60,14 @@ public class CollectorService {
                 });
             }
             parallelExecutor.awaitTermination(1, TimeUnit.HOURS);
-            corpusBuilder.close();
             mailService.notifyCreation(request, "Datasource analyzed. Ready to create a new topic model.");
             return true;
         }catch (Exception e){
             LOG.error("Unexpected error harvesting datasource: " + request, e);
             mailService.notifyError(request, "Datasource error. For details consult with your system administrator.");
             return false;
+        }finally{
+            corpusBuilder.close();
         }
     }
 }

@@ -44,7 +44,7 @@ public class CorpusBuilder {
 
     private BufferedWriter writer;
     private Path filePath;
-    private Boolean isClosed = false;
+    private Boolean isClosed = true;
     private AtomicInteger counter   = new AtomicInteger(0);
     private String updated = "";
     private String language = null;
@@ -68,8 +68,6 @@ public class CorpusBuilder {
         this.filePath = filePath;
 
         this.librairyNlpClient = librairyNlpClient;
-
-        initialize();
 
         //load all languages:
         LanguageProfileReader langReader = new LanguageProfileReader();
@@ -127,7 +125,10 @@ public class CorpusBuilder {
             String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Arrays.asList(PoS.NOUN, PoS.VERB, PoS.ADJECTIVE), multigrams));
             row.append(text);
             updated = DateBuilder.now();
-            if (isClosed) initialize();
+            if (isClosed) {
+                writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
+                setClosed(false);
+            }
             write(row.toString()+"\n");
             LOG.debug("Added document: [" + document.getId() +"] to corpus");
         }finally{
@@ -151,37 +152,43 @@ public class CorpusBuilder {
         counter.set(0);
         close();
         filePath.toFile().delete();
-        initialize();
+//        initialize();
     }
 
-    public synchronized void initialize() throws IOException {
-
-        if (!load()){
-            LOG.info("Initialized an empty corpus..");
-            filePath.toFile().getParentFile().mkdirs();
-            language = null;
-        }else{
-            LOG.info("corpus initialized with " + counter.get() + " documents");
-        }
-
-        writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
-        setClosed(false);
-    }
+//    public synchronized void initialize() throws IOException {
+//
+//        if (!load()){
+//            LOG.info("Initialized an empty corpus..");
+//            filePath.toFile().getParentFile().mkdirs();
+//            language = null;
+//        }else{
+//            LOG.info("corpus initialized with " + counter.get() + " documents");
+//        }
+//
+//        writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
+//        setClosed(false);
+//    }
 
 
     public synchronized boolean load(){
 
         if (!filePath.toFile().exists()) return false;
         LOG.info("Loading an existing corpus..");
+        BufferedReader reader = null;
         try{
-            BufferedReader reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath.toFile()))));
+            reader = new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(filePath.toFile()))));
             counter.set(Long.valueOf(reader.lines().count()).intValue());
             updated = DateBuilder.from(filePath.toFile().lastModified());
-            reader.close();
             return true;
         }catch (Exception e){
             LOG.debug("Error reading lines in existing file: " + filePath,e);
             return false;
+        }finally{
+            if (reader != null) try {
+                reader.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -196,7 +203,7 @@ public class CorpusBuilder {
             Optional<LdLocale> lang = languageDetector.detect(textObject);
             if (!lang.isPresent()){
                 LOG.warn("language not detected! english by default");
-                return DEFAULT_LANG;
+                lang = Optional.of(LdLocale.fromString(DEFAULT_LANG));
             }
             LOG.info("Language=" + lang.get());
             language = lang.get().getLanguage();
@@ -204,7 +211,7 @@ public class CorpusBuilder {
         return language;
     }
 
-    public void close() throws IOException {
+    public void close() {
         while(pendingDocs.get() > 0){
             LOG.info("waiting for adding "+pendingDocs.get()+" pending docs to close it... ");
             try {

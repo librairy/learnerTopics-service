@@ -1,0 +1,35 @@
+{
+  "name": "20newsgroup-model",
+  "description": "topic model created from 20newsgroup dataset",
+  "contactEmail": "cbadenes@fi.upm.es",
+  "version": "1.0",
+  "annotate":false,
+  "parameters": {
+    "maxdocratio": "0.9",
+    "minfreq": "5",
+    "multigrams": "false",
+    "retries":"0",
+    "seed":"1066",
+    "alpha": "0.1",
+    "beta":"0.01",
+    "iterations":"1000",
+    "stopwords":"write article say make"
+  },
+  "from": {
+    "cache": true,
+    "fields": {
+      "id": "0",
+      "labels": [
+        "1"
+      ],
+      "text": [
+        "2"
+      ]
+    },
+    "filter":";;",
+    "format": "CSV_TAR_GZ",
+    "offset": 0,
+    "size": -1,
+    "url": "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/mdeYNdiRs5obfMH/download"
+  }
+}

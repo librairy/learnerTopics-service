@@ -1,8 +1,10 @@
 package org.librairy.service.learner.io;
 
+import com.google.common.base.Strings;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.librairy.service.learner.facade.model.DataSource;
 import org.librairy.service.learner.model.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,32 +12,25 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.zip.GZIPInputStream;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
  */
 
-public class  JsonlReader implements Reader{
+public class  JsonlReader extends FileReader{
 
     private static final Logger LOG = LoggerFactory.getLogger(JsonlReader.class);
-    private final Map<String, String> map;
+    private final Map<String, List<String>> map;
     private final String path;
 
     private BufferedReader reader;
 
-    public JsonlReader(File jsonFile,Map<String,String> map) throws IOException {
-        this.path = jsonFile.getAbsolutePath();
-        this.reader = path.endsWith(".gz")?
-                new BufferedReader(new InputStreamReader(new GZIPInputStream(new FileInputStream(jsonFile)))) :
-                new BufferedReader(new InputStreamReader(new FileInputStream(jsonFile))) ;
-        this.map = map;
-    }
-
-    public JsonlReader(InputStreamReader input,Map<String,String> map) throws IOException {
-        this.path   ="inputStream";
-        this.reader = new BufferedReader(input);
-        this.map    = map;
+    public JsonlReader(DataSource dataSource, Boolean zip) throws IOException {
+        this.path           = "inputStream";
+        this.reader         = new BufferedReader(getInputStream(dataSource.getUrl(), zip));
+        this.map            = getParameters(dataSource);
     }
 
 
@@ -51,33 +46,14 @@ public class  JsonlReader implements Reader{
 
             JSONObject jsonObject = new JSONObject(line);
 
-            if (map.containsKey("id"))      document.setId(jsonObject.getString(map.get("id")).replaceAll("\\P{Print}", ""));
-            if (map.containsKey("text") && jsonObject.has(map.get("text")))    {
-                try{
-                    document.setText(jsonObject.getString(map.get("text")).replaceAll("\\P{Print}", ""));
-                }catch (JSONException e){
-                    LOG.warn(""+e.getMessage());
-                }
+            if (map.containsKey("id")) {
+                document.setId(retrieve(jsonObject, map.get("id")));
+            }
+            if (map.containsKey("text"))    {
+                document.setText(retrieve(jsonObject, map.get("text")));
             }
             if (map.containsKey("labels")){
-
-                List<String> labels = new ArrayList<>();
-                Object labelObject = jsonObject.get(map.get("labels"));
-
-                if (labelObject instanceof JSONArray){
-
-                    JSONArray labelList = jsonObject.getJSONArray(map.get("labels"));
-
-                    for(int i=0;i<labelList.length();i++){
-                        String label = (String) labelList.get(i);
-                        labels.add(label.replaceAll("\\P{Print}", ""));
-                    }
-
-                }else{
-                    labels.add(jsonObject.getString(map.get("labels")));
-                }
-
-                document.setLabels(labels);
+                document.setLabels(Arrays.asList(retrieve(jsonObject, map.get("labels")).split(" ")));
             }
 
             return Optional.of(document);
@@ -88,21 +64,28 @@ public class  JsonlReader implements Reader{
         }
     }
 
-    @Override
-    public void offset(Integer numLines) {
-        if (numLines>0){
-            AtomicInteger counter = new AtomicInteger();
-            String line;
-            try{
-                while (((line = reader.readLine()) != null) && (counter.incrementAndGet() <= numLines)){
+    private String retrieve(JSONObject jsonObject, List<String> fields){
+        StringBuilder txt = new StringBuilder();
+        fields.stream().filter(i -> jsonObject.has(i)).forEach(i -> {
+
+            Object innerObject = jsonObject.get(i);
+
+            if (innerObject instanceof JSONArray){
+
+                JSONArray jsonArray = jsonObject.getJSONArray(i);
+
+                for(int j=0;j<jsonArray.length();j++){
+                    String innerText = (String) jsonArray.get(j);
+                    txt.append(format(innerText)).append(" ");
                 }
 
-            }catch (Exception e){
-                LOG.error("Unexpected error parsing file: " + path,e);
+            }else{
+                txt.append(format(jsonObject.getString(i))).append(" ");
             }
 
+        });
+        return txt.toString();
 
-        }
     }
 
 }
