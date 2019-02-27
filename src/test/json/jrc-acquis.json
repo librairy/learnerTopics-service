@@ -1,6 +1,6 @@
 {
-  "name": "20newsgroup-model",
-  "description": "topic model created from 20newsgroup dataset",
+  "name": "jrc-acquis-EN-model",
+  "description": "Collection of legislative texts (EN) from the European Union generated between years 1958 and 2006",
   "contactEmail": "cbadenes@fi.upm.es",
   "version": "1.0",
   "annotate":false,
@@ -13,23 +13,23 @@
     "alpha": "0.1",
     "beta":"0.01",
     "iterations":"1000",
-    "stopwords":"write article say make thing year time"
+    "stopwords":"vii vi tel. wto"
   },
   "from": {
     "cache": true,
     "fields": {
-      "id": "0",
+      "id": "id",
       "labels": [
-        "1"
+        "labels_t"
       ],
       "text": [
-        "2"
+        "name_s", "txt_t"
       ]
     },
-    "filter":";;",
-    "format": "CSV_TAR_GZ",
+    "filter":"size_i:[100 TO 10000] && source_s:jrc && lang_s:en && labels_t:[* TO *]",
+    "format": "SOLR_CORE",
     "offset": 0,
     "size": -1,
-    "url": "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/mdeYNdiRs5obfMH/download"
+    "url": "http://librairy.linkeddata.es/solr/documents"
   }
 }

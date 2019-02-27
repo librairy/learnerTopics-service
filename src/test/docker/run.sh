@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-docker run -it --rm --name learner-topics-service -p 7777:7777 -e NLP_ENDPOINT=http://librairy.linkeddata.es/nlp-%% -v /var/run/docker.sock:/var/run/docker.sock librairy/learner-topics-service:latest

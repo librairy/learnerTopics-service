@@ -115,7 +115,8 @@ public class BoWPipeBuilder implements PipeBuilderI{
         LOG.info("Getting stats to complete prune actions ..");
         int count = 0;
         int interval = size < 100? 10 : size/100;
-        while(iterator.hasNext()){
+        final boolean[] error = {false};
+        while(iterator.hasNext() && !error[0]){
 
             try{
                 count++;
@@ -130,6 +131,7 @@ public class BoWPipeBuilder implements PipeBuilderI{
                     }catch (NoSuchElementException e){
                         LOG.info("list completed");
                     }catch (Exception e){
+                        if (e instanceof java.lang.IllegalStateException) error[0] = true;
                         LOG.error("Instance not handled by pipe: " + e.getMessage(),e);
                     }
                 });

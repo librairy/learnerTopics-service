@@ -107,8 +107,10 @@ public class InstanceBuilder {
                 });
             }catch (IllegalStateException e){
                 LOG.warn("Error reading next instance",e);
+                break;
             }catch (RuntimeException e){
                 LOG.info("Handle Runtime Info: " + e.getMessage());
+                break;
             }catch (Exception e){
                 LOG.error("Error reading next instance",e);
                 break;

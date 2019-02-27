@@ -43,8 +43,6 @@ public class ModelService {
                 return false;
             }
 
-            corpus.close();
-
             LOG.info("ready to create a new topic model with parameters: " + parameters);
             ModelParams ldaParameters = new ModelParams(corpus.getFilePath().toFile().getAbsolutePath(), resourceFolder);
 

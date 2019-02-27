@@ -1,0 +1,20 @@
+
+
+            Model created successfully!!
+
+            It is available as Docker image at: https://cloud.docker.com/u/librairy/repository/docker/$signature
+
+            You can test it by run:
+
+                    $ docker run -p 8080:7777 $image
+
+            And check it at: http://localhost:8080
+
+            Thanks for using our services!
+
+librAIry Framework
+http://librairy.linkeddata.es
+
+Ontology Engineering Group
+Universidad Politecnica de Madrid
+2019

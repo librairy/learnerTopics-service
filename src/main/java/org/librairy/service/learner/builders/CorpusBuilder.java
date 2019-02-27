@@ -95,14 +95,6 @@ public class CorpusBuilder {
         this.textObjectFactory = CommonTextObjectFactories.forDetectingOnLargeText();
     }
 
-    public void destroy() throws IOException {
-        close();
-    }
-
-    public String getUpdated() {
-        return updated;
-    }
-
     public Integer getNumDocs(){
         return counter.get();
     }
@@ -125,49 +117,28 @@ public class CorpusBuilder {
             String text = raw? document.getText().replaceAll("\\P{Print}", "") : BoWService.toText(librairyNlpClient.bow(document.getText().replaceAll("\\P{Print}", ""), language, Arrays.asList(PoS.NOUN, PoS.VERB, PoS.ADJECTIVE), multigrams));
             row.append(text);
             updated = DateBuilder.now();
-            if (isClosed) {
-                writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
-                setClosed(false);
-            }
-            write(row.toString()+"\n");
+            write(row.toString());
             LOG.debug("Added document: [" + document.getId() +"] to corpus");
         }finally{
             pendingDocs.decrementAndGet();
         }
     }
 
-    private synchronized void write(String text){
+    private synchronized void write(String text) {
         try {
+            if (isClosed) {
+                writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(), true))));
+                setClosed(false);
+            }
             writer.write(text);
+            writer.newLine();
             counter.incrementAndGet();
         } catch (IOException e) {
             LOG.warn("Error writing on file: " + e.getMessage());
-        } catch (Exception e){
-            LOG.error("Unexpected Error writing on file: " + e.getMessage(),e);
+        } catch (Exception e) {
+            LOG.error("Unexpected Error writing on file: " + e.getMessage(), e);
         }
     }
-
-    public synchronized void remove() throws IOException {
-        LOG.info("Corpus deleted");
-        counter.set(0);
-        close();
-        filePath.toFile().delete();
-//        initialize();
-    }
-
-//    public synchronized void initialize() throws IOException {
-//
-//        if (!load()){
-//            LOG.info("Initialized an empty corpus..");
-//            filePath.toFile().getParentFile().mkdirs();
-//            language = null;
-//        }else{
-//            LOG.info("corpus initialized with " + counter.get() + " documents");
-//        }
-//
-//        writer = new BufferedWriter(new OutputStreamWriter(new GZIPOutputStream(new FileOutputStream(filePath.toFile(),true))));
-//        setClosed(false);
-//    }
 
 
     public synchronized boolean load(){
@@ -228,6 +199,7 @@ public class CorpusBuilder {
             try{
 //                writer.flush();
                 writer.close();
+                LOG.info("Writer closed with " + counter.get() + " documents added");
             }catch (IOException e){
                 LOG.error("Writer closing error",e);
             }

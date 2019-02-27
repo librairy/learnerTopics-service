@@ -60,7 +60,7 @@ public class CollectorService {
                 });
             }
             parallelExecutor.awaitTermination(1, TimeUnit.HOURS);
-            mailService.notifyCreation(request, "Datasource analyzed. Ready to create a new topic model.");
+//            mailService.notifyCreation(request, "Datasource analyzed. Ready to create a new topic model.");
             return true;
         }catch (Exception e){
             LOG.error("Unexpected error harvesting datasource: " + request, e);

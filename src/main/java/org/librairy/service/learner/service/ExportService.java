@@ -112,7 +112,7 @@ public class ExportService {
         dockerCredentials.setEmail(dockerEmail);
         dockerCredentials.setUsername(dockerUser);
         dockerCredentials.setPassword(dockerPwd);
-        String repoName = dockerRepo+"/"+name.replaceAll("\\W+", "-")+":"+request.getVersion();
+        String repoName = dockerRepo+"/"+name.toLowerCase().replaceAll("\\W+", "-")+":"+request.getVersion().toLowerCase();
         dockerCredentials.setRepository(repoName);
         export.setCredentials(dockerCredentials);
 
@@ -244,7 +244,7 @@ public class ExportService {
                     }
 
                     LOG.info("Docker Image created successfully");
-                    mailService.notifyCreation(request, "Docker image created successfully: " + dockerCredentials.getRepository());
+                    mailService.notifyCreation(request, dockerCredentials.getRepository());
 
                     if (export.getRemoveAfterPush()){
                         LOG.info("Removing docker image from local repository");
