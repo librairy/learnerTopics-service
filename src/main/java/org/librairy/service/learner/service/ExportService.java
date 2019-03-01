@@ -225,7 +225,7 @@ public class ExportService {
 
         if (Strings.isNullOrEmpty(returnedImageId)) {
             LOG.warn("Image not created");
-            mailService.notifyError(request, "Docker image not created");
+            mailService.notifyModelError(request, "Docker image not created");
             return false;
         }
 
@@ -240,11 +240,11 @@ public class ExportService {
                         dockerClient.push(imageName, handler, credentials);
                     } catch (Exception e) {
                         LOG.error("Error on push: ", e);
-                        mailService.notifyError(request, "Docker image not uploaded to DockerHub");
+                        mailService.notifyModelError(request, "Docker image not uploaded to DockerHub");
                     }
 
                     LOG.info("Docker Image created successfully");
-                    mailService.notifyCreation(request, dockerCredentials.getRepository());
+                    mailService.notifyModelCreation(request, dockerCredentials.getRepository());
 
                     if (export.getRemoveAfterPush()){
                         LOG.info("Removing docker image from local repository");
@@ -253,7 +253,7 @@ public class ExportService {
 
                 } catch (Exception e) {
                     LOG.warn("Error pushing docker image", e);
-                    mailService.notifyError(request, "Connection error to Docker Hub");
+                    mailService.notifyModelError(request, "Connection error to Docker Hub");
                 }
             });
         }

@@ -12,8 +12,6 @@ import org.thymeleaf.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import java.nio.file.*;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -95,7 +93,7 @@ public class WorkflowService {
 
                     }catch (Exception e){
                         LOG.error("Error creating topics",e);
-                        if (request != null) mailService.notifyError(request, "Model not created. For details consult with your system administrator.  ");
+                        if (request != null) mailService.notifyModelError(request, "Model not created. For details consult with your system administrator.  ");
                     } finally{
                         if ((request != null) && (request.get("from")!= null) && (request.getFrom().get("cache") != null) && (!request.getFrom().getCache())){
                             workspaceService.delete(request);

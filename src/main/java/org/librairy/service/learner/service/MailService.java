@@ -7,6 +7,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.librairy.service.learner.facade.model.TopicsRequest;
+import org.librairy.service.learner.model.AnnotationRequest;
 import org.librairy.service.modeler.facade.model.Settings;
 import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
@@ -54,11 +55,11 @@ public class MailService {
         LOG.info("Mail Service initialized");
     }
 
-    public void notifyError(TopicsRequest request, String message){
+    public void notifyModelError(TopicsRequest request, String message){
 
         try {
             LOG.info("Mail error notification of " + request + " because of " + message);
-            Template t = velocityEngine.getTemplate("MailTemplateError.vm");
+            Template t = velocityEngine.getTemplate("MailModelError.vm");
 
             VelocityContext context = new VelocityContext();
 
@@ -72,11 +73,29 @@ public class MailService {
 
     }
 
-    public void notifyCreation(TopicsRequest request, String message){
+    public void notifyAnnotationError(AnnotationRequest request, String message){
+
+        try {
+            LOG.info("Mail error notification of " + request + " because of " + message);
+            Template t = velocityEngine.getTemplate("MailAnnotationError.vm");
+
+            VelocityContext context = new VelocityContext();
+
+            StringWriter fw = new StringWriter();
+            t.merge(context, fw);
+            fw.close();
+            mailTo(request.getContactEmail(), "Something went wrong during annotation..", fw.toString() );
+        } catch (IOException e) {
+            LOG.error("Unexpected error sending an email",e);
+        }
+
+    }
+
+    public void notifyModelCreation(TopicsRequest request, String message){
 
         try {
             LOG.info("Mail creation notification of " + request + " because of " + message);
-            Template t = velocityEngine.getTemplate("MailTemplateSuccess.vm");
+            Template t = velocityEngine.getTemplate("MailModelSuccess.vm");
 
             VelocityContext context = new VelocityContext();
             String image = message;
@@ -88,6 +107,28 @@ public class MailService {
             t.merge(context, fw);
             fw.close();
             mailTo(request.getContactEmail(), "["+ request.getName()+"] Your Topic Model is ready!", fw.toString() );
+        } catch (IOException e) {
+            LOG.error("Unexpected error sending an email",e);
+        }
+
+    }
+
+    public void notifyAnnotation(AnnotationRequest request, String message){
+
+        try {
+            LOG.info("Mail creation notification of " + request + " because of " + message);
+            Template t = velocityEngine.getTemplate("MailAnnotationSuccess.vm");
+
+            VelocityContext context = new VelocityContext();
+            String image = message;
+            String signature = StringUtils.substringBefore(image,":");
+            context.put("source", request.getCollection() + "?" + request.getFilter());
+            context.put("model", request.getModel());
+
+            StringWriter fw = new StringWriter();
+            t.merge(context, fw);
+            fw.close();
+            mailTo(request.getContactEmail(), "Your Annotations are ready!", fw.toString() );
         } catch (IOException e) {
             LOG.error("Unexpected error sending an email",e);
         }

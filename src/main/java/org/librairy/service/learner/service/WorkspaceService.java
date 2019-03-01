@@ -35,6 +35,7 @@ public class WorkspaceService {
     public CorpusBuilder create(TopicsRequest request) throws IOException {
         Path workspacePath = getPath(request);
         if (!workspacePath.toFile().getParentFile().exists()) workspacePath.toFile().getParentFile().mkdirs();
+        if (!request.getFrom().getCache() && workspacePath.toFile().exists()) workspacePath.toFile().delete();
         CorpusBuilder corpusBuilder = new CorpusBuilder(workspacePath, librairyNlpClient);
         if (request.getFrom().getCache()) corpusBuilder.load();
         return corpusBuilder;

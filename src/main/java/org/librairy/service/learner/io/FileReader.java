@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -49,7 +48,7 @@ public abstract class FileReader implements Reader{
     }
 
     protected String format(String text){
-        return StringReader.format(text);
+        return StringReader.hardFormat(text);
     }
 
     @Override

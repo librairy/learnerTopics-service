@@ -64,7 +64,7 @@ public class CSVReader extends FileReader{
             if (map.containsKey("labels")){
                 StringBuilder labels = new StringBuilder();
                 for(Integer i : map.get("labels")){
-                    labels.append(format(values[i])).append(" ");
+                    labels.append(StringReader.softFormat(values[i])).append(" ");
                 }
 
                 document.setLabels(Arrays.asList(labels.toString().split(labelSeparator)));

@@ -1,0 +1,6 @@
+{
+  "collection": "http://librairy.linkeddata.es/solr/documents",
+  "contactEmail": "cbadenes@fi.upm.es",
+  "filter": "txt_t:[* TO *] && lang_s:en",
+  "model": "http://librairy.linkeddata.es/jrc-en-model"
+}

@@ -1,0 +1,7 @@
+docker pull librairy/modeler-topics-service:latest
+docker pull librairy/learner-topics-service:latest
+docker pull librairy/nlp-en-service:latest
+docker pull librairy/nlp-es-service:latest
+docker pull librairy/nlp-fr-service:latest
+docker pull librairy/nlp-du-service:latest
+docker pull librairy/nlp-pt-service:latest

@@ -5,21 +5,28 @@ import cc.mallet.pipe.TokenSequenceRemoveStopwords;
 import cc.mallet.pipe.iterator.CsvIterator;
 import cc.mallet.types.Instance;
 import cc.mallet.types.InstanceList;
+import cc.mallet.types.Labeling;
+import com.google.common.base.Strings;
 import org.librairy.service.learner.executors.ParallelExecutor;
 import org.librairy.service.learner.model.BoWReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.util.StringUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>
@@ -49,7 +56,7 @@ public class InstanceBuilder {
      * @param maxDocRatio Remove words that occur in more than (X*100)% of documents. 0.05 is equivalent to IDF of 3.0.
      * @return
      */
-    public InstanceList getInstances(String filePath, Integer size, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos, Integer minFreq, Double maxDocRatio, Boolean raw, List<String> stopwords) throws IOException {
+    public InstanceList getInstances(String filePath, Integer size, String regEx, int textIndex, int labelIndex, int idIndex, boolean enableTarget, String pos, Integer minFreq, Double maxDocRatio, Boolean raw, List<String> stopwords, List<String> stoplabels) throws IOException {
 
         PipeBuilderI pipeBuilder = PipeBuilderFactory.newInstance(size, raw);
 
@@ -89,6 +96,10 @@ public class InstanceBuilder {
         LOG.info("processing documents in a parallel BoW-pipe builder ..");
         AtomicInteger counter = new AtomicInteger();
         int interval = size < 100? 10 : size/100;
+
+        final Map<String,Integer> labelsExcluded = new HashMap<>();
+        stoplabels.forEach(l -> labelsExcluded.put(l,1));
+
         while(cvsIterator.hasNext()){
 
             try {
@@ -99,7 +110,9 @@ public class InstanceBuilder {
                 }
                 executors.submit(() -> {
                     try {
-                        instances.addThruPipe(rawInstance);
+                        if (isValid(rawInstance, labelsExcluded)){
+                            instances.addThruPipe(rawInstance);
+                        }
                     } catch (Exception e) {
                         LOG.error("Instance not handled by pipe: " + e.getMessage());
                         instances.remove(rawInstance);
@@ -107,10 +120,8 @@ public class InstanceBuilder {
                 });
             }catch (IllegalStateException e){
                 LOG.warn("Error reading next instance",e);
-                break;
             }catch (RuntimeException e){
                 LOG.info("Handle Runtime Info: " + e.getMessage());
-                break;
             }catch (Exception e){
                 LOG.error("Error reading next instance",e);
                 break;
@@ -138,6 +149,27 @@ public class InstanceBuilder {
 
     }
 
+
+    private Boolean isValid(Instance instance, Map<String,Integer> labelsExcluded){
+        String data = (String) instance.getData();
+        if (Strings.isNullOrEmpty(data)) return false;
+
+        String filteredData = Arrays.stream(data.split(" ")).filter(t -> StringUtils.substringBefore(t,"=").length()>2).filter(w -> !StringUtils.substringBefore(w,"=").matches(".*\\d+.*")).collect(Collectors.joining(" "));
+        if (Strings.isNullOrEmpty(filteredData)) return false;
+        instance.setData(filteredData);
+
+
+        if (labelsExcluded.isEmpty()) return true;
+        Object target = instance.getTarget();
+        if (target == null) return false;
+        List<String> labels = Arrays.asList(((String) target).split(" "));
+        if (labels.isEmpty()) return false;
+        // fix target
+        String validLabels = labels.stream().filter(l -> !labelsExcluded.containsKey(l)).collect(Collectors.joining(" "));
+        if (Strings.isNullOrEmpty(validLabels)) return false;
+        instance.setTarget(validLabels);
+        return true;
+    }
 
 
 }

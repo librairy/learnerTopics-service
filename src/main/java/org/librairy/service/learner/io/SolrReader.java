@@ -4,7 +4,6 @@ import com.google.common.base.Strings;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
@@ -67,13 +66,14 @@ public class SolrReader implements Reader {
         labelsFields.forEach(f -> solrQuery.addField(f));
         solrQuery.setQuery(filter);
         solrQuery.addSort(idField, SolrQuery.ORDER.asc);
-        this.cursorMark = CursorMarkParams.CURSOR_MARK_START;
+        this.nextCursorMark = CursorMarkParams.CURSOR_MARK_START;
         query();
 
     }
 
     private void query() throws IOException {
         try{
+            this.cursorMark = nextCursorMark;
             solrQuery.set(CursorMarkParams.CURSOR_MARK_PARAM, cursorMark);
             QueryResponse rsp = solrClient.query(collection, solrQuery);
             this.nextCursorMark = rsp.getNextCursorMark();
@@ -88,7 +88,9 @@ public class SolrReader implements Reader {
     public Optional<Document> next() {
         try{
             if (index.get() >= solrDocList.size()) {
-                if (index.get() < window) return Optional.empty();
+                if (index.get() < window){
+                    return Optional.empty();
+                }
                 query();
             }
 
@@ -104,12 +106,12 @@ public class SolrReader implements Reader {
             document.setId(id);
 
             StringBuilder txt = new StringBuilder();
-            txtFields.stream().filter(tf -> solrDoc.containsKey(tf)).forEach(tf -> txt.append(StringReader.format(solrDoc.getFieldValue(tf).toString())).append(" "));
+            txtFields.stream().filter(tf -> solrDoc.containsKey(tf)).forEach(tf -> txt.append(StringReader.hardFormat(solrDoc.getFieldValue(tf).toString())).append(" "));
             document.setText(txt.toString());
 
             if (!labelsFields.isEmpty()){
                 StringBuilder labels = new StringBuilder();
-                labelsFields.stream().filter(tf -> solrDoc.containsKey(tf)).forEach(tf -> labels.append(StringReader.format(solrDoc.getFieldValue(tf).toString())).append(" "));
+                labelsFields.stream().filter(tf -> solrDoc.containsKey(tf)).forEach(tf -> labels.append(StringReader.softFormat(solrDoc.getFieldValue(tf).toString())).append(" "));
                 document.setLabels(Arrays.asList(labels.toString().split(" ")));
             }
 

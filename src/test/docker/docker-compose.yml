@@ -1,0 +1,18 @@
+version: '3'
+services:
+#  dbpedia-spotlight:
+#   image: dbpedia/spotlight-english:latest
+#   command: java -Dfile.encoding=UTF-8 -Xmx15G -Dthreads.max=5 -Dthreads.core=5 -jar /opt/spotlight/dbpedia-spotlight-nightly-build.jar /opt/spotlight/en  http://0.0.0.0:80/rest
+  nlp-en-service:
+    image: librairy/nlp-en-service:latest
+  learner-topics:
+    image: librairy/learner-topics-service:latest
+    ports:
+     - "7777:7777"
+    environment:
+      - LIBRAIRY_API_USERS=oeg:oeg2018
+      - JAVA_OPTS=-Xmx53248m
+      - REST_PATH=/learner
+    volumes:
+     - ./data:/librairy
+     - /var/run/docker.sock:/var/run/docker.sock

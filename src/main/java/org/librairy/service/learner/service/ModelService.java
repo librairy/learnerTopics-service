@@ -39,7 +39,7 @@ public class ModelService {
         try {
             if (corpus.getNumDocs() <= 0 ){
                 LOG.info("Corpus is empty.");
-                mailService.notifyError(request, "Model not created. Corpus is empty.");
+                mailService.notifyModelError(request, "Model not created. Corpus is empty.");
                 return false;
             }
 
@@ -62,6 +62,7 @@ public class ModelService {
             if (parameters.containsKey("multigrams"))   ldaParameters.setEntities(Boolean.valueOf(parameters.get("multigrams")));
             if (parameters.containsKey("entities"))     ldaParameters.setEntities(Boolean.valueOf(parameters.get("entities")));
             if (parameters.containsKey("seed"))         ldaParameters.setSeed(Integer.valueOf(parameters.get("seed")));
+            if (parameters.containsKey("stoplabels"))   ldaParameters.setStoplabels(Arrays.asList(parameters.get("stoplabels").split(" ")));
 
             ldaParameters.setSize(corpus.getNumDocs());
 
@@ -74,15 +75,15 @@ public class ModelService {
             return true;
         } catch (IOException e) {
             LOG.error("Error building a topic model from: " + parameters, e);
-            mailService.notifyError(request, "Model not created. For details consult your administrator. ");
+            mailService.notifyModelError(request, "Model not created. For details consult your administrator. ");
             return false;
         } catch(ClassCastException e) {
             LOG.error("Error reading parameters from: " + parameters, e);
-            mailService.notifyError(request, "Model not created. For details consult your administrator. ");
+            mailService.notifyModelError(request, "Model not created. For details consult your administrator. ");
             return false;
         } catch(Exception e){
             LOG.error("Unexpected error during training phase", e);
-            mailService.notifyError(request, "Model not created. For details consult your administrator. ");
+            mailService.notifyModelError(request, "Model not created. For details consult your administrator. ");
             return false;
         }
     }

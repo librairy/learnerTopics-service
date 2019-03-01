@@ -1,0 +1,35 @@
+{
+  "name": "scielo-en-model",
+  "description": "Collection of scientific papers (EN) from biomedical, computer science and math domain",
+  "contactEmail": "cbadenes@fi.upm.es",
+  "version": "1.0",
+  "annotate":false,
+  "parameters": {
+    "maxdocratio": "0.9",
+    "minfreq": "5",
+    "multigrams": "false",
+    "retries":"0",
+    "seed":"1066",
+    "alpha": "0.1",
+    "beta":"0.01",
+    "iterations":"1000",
+    "stopwords":""
+  },
+  "from": {
+    "cache": false,
+    "fields": {
+      "id": "id",
+      "labels": [
+        "keywords_en_str"
+      ],
+      "text": [
+        "title_en_str"
+      ]
+    },
+    "filter":"keywords_en_str:[* TO *] && title_en_str:[* TO *]",
+    "format": "SOLR_CORE",
+    "offset": 0,
+    "size": -1,
+    "url": "http://librairy.linkeddata.es/solr/articles"
+  }
+}

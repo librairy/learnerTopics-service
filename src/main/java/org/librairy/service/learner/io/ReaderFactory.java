@@ -25,7 +25,7 @@ public class ReaderFactory {
             case CSV_TAR_GZ: return new CSVReader(dataSource, true);
             case JSONL: return new JsonlReader(dataSource, false);
             case JSONL_TAR_GZ: return new JsonlReader(dataSource, true);
-            default: throw new RuntimeException("No reader found by format: " + format);
+            default: throw new RuntimeException("No reader found by hardFormat: " + format);
         }
 
     }

@@ -1,0 +1,35 @@
+{
+  "name": "jrc-acquis-EN-model",
+  "description": "Collection of legislative texts (EN) from the European Union generated between years 1958 and 2006",
+  "contactEmail": "cbadenes@fi.upm.es",
+  "version": "1.0",
+  "annotate":false,
+  "parameters": {
+    "maxdocratio": "0.9",
+    "minfreq": "5",
+    "multigrams": "false",
+    "retries":"0",
+    "seed":"1066",
+    "alpha": "0.1",
+    "beta":"0.01",
+    "iterations":"1000",
+    "stopwords":"parliament republic eea union market joint animal proposal common financial country aid state service e.on mrs esf"
+  },
+  "from": {
+    "cache": false,
+    "fields": {
+      "id": "id",
+      "labels": [
+        "labels_t"
+      ],
+      "text": [
+        "name_s", "txt_t"
+      ]
+    },
+    "filter":"size_i:[100 TO 10000] && source_s:jrc && lang_s:en && labels_t:[* TO *]",
+    "format": "SOLR_CORE",
+    "offset": 0,
+    "size": -1,
+    "url": "http://librairy.linkeddata.es/solr/documents"
+  }
+}

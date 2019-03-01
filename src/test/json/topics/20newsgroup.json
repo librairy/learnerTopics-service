@@ -16,7 +16,7 @@
     "stopwords":"write article say make thing year time"
   },
   "from": {
-    "cache": true,
+    "cache": false,
     "fields": {
       "id": "0",
       "labels": [

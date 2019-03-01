@@ -1,6 +1,6 @@
 {
-  "name": "jrc-acquis-EN-model",
-  "description": "Collection of legislative texts (EN) from the European Union generated between years 1958 and 2006",
+  "name": "oo-api-en-model",
+  "description": "Collection of government contracts (EN) from the European Union",
   "contactEmail": "cbadenes@fi.upm.es",
   "version": "1.0",
   "annotate":false,
@@ -13,10 +13,10 @@
     "alpha": "0.1",
     "beta":"0.01",
     "iterations":"1000",
-    "stopwords":"vii vi tel. wto"
+    "stopwords":"lot chp sbs full itt nhs dfid phe ncs wee european project"
   },
   "from": {
-    "cache": true,
+    "cache": false,
     "fields": {
       "id": "id",
       "labels": [
@@ -26,7 +26,7 @@
         "name_s", "txt_t"
       ]
     },
-    "filter":"size_i:[100 TO 10000] && source_s:jrc && lang_s:en && labels_t:[* TO *]",
+    "filter":"size_i:[100 TO 10000] && source_s:oo-api && lang_s:en && labels_t:[* TO *]",
     "format": "SOLR_CORE",
     "offset": 0,
     "size": -1,

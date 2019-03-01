@@ -1,0 +1,36 @@
+{
+  "name": "oo-s3-en-model",
+  "description": "Collection of government contracts (EN) from the European Union",
+  "contactEmail": "cbadenes@fi.upm.es",
+  "version": "1.0",
+  "annotate":false,
+  "parameters": {
+    "maxdocratio": "0.9",
+    "minfreq": "5",
+    "multigrams": "false",
+    "retries":"0",
+    "seed":"1066",
+    "alpha": "0.1",
+    "beta":"0.01",
+    "topics":100,
+    "iterations":"1000",
+    "stopwords":""
+  },
+  "from": {
+    "cache": false,
+    "fields": {
+      "id": "id",
+      "labels": [
+        "labels_t"
+      ],
+      "text": [
+        "name_s", "txt_t"
+      ]
+    },
+    "filter":"size_i:[100 TO 10000] && source_s:oo-s3 && lang_s:en",
+    "format": "SOLR_CORE",
+    "offset": 0,
+    "size": -1,
+    "url": "http://librairy.linkeddata.es/solr/documents"
+  }
+}

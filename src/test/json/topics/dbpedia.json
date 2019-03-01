@@ -1,0 +1,35 @@
+{
+  "name": "dbpedia-model",
+  "description": "Created from the DBpedia ontology classification dataset by picking 14 non-overlapping classes from DBpedia 2014",
+  "contactEmail": "cbadenes@fi.upm.es",
+  "version": "1.0",
+  "annotate":false,
+  "parameters": {
+    "maxdocratio": "0.9",
+    "minfreq": "5",
+    "multigrams": "false",
+    "retries":"0",
+    "seed":"1066",
+    "alpha": "0.1",
+    "beta":"0.01",
+    "iterations":"1000",
+    "stopwords":"bear"
+  },
+  "from": {
+    "cache": false,
+    "fields": {
+      "id": "1",
+      "labels": [
+        "0"
+      ],
+      "text": [
+        "2"
+      ]
+    },
+    "filter":",",
+    "format": "CSV_TAR_GZ",
+    "offset": 0,
+    "size": -1,
+    "url": "https://delicias.dia.fi.upm.es/nextcloud/index.php/s/Kg2rk93qS6jHpCX/download"
+  }
+}

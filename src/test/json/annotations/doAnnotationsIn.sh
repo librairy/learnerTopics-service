@@ -1,0 +1,1 @@
+curl -u oeg:oeg2018 -vX POST http://localhost:7777/learner/annotations -d @$1 --header "Content-Type: application/json"
