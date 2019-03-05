@@ -39,7 +39,7 @@ public class LearnerServiceImpl implements LearnerService {
 //    public void setup() throws IOException {
 //
 //        //// Load resources
-//        //model              = Paths.get(resourceFolder,"resource.bin").toFile().getAbsolutePath();
+//        //model              = Paths.take(resourceFolder,"resource.bin").toFile().getAbsolutePath();
 //
 //        executor             = new ParallelExecutor();
 //        LOG.info("Service initialized");

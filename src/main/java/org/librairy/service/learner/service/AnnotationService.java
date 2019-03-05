@@ -23,11 +23,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -41,12 +38,7 @@ public class AnnotationService {
     private static final Logger LOG = LoggerFactory.getLogger(AnnotationService.class);
 
     @Autowired
-    QueueService queueService;
-
-    @Autowired
     MailService mailService;
-
-    private ExecutorService executors;
 
     static{
         Unirest.setObjectMapper(new ObjectMapper() {
@@ -77,34 +69,7 @@ public class AnnotationService {
     }
 
 
-    @PostConstruct
-    public void setup(){
-        executors = Executors.newSingleThreadExecutor();
-        executors.submit(new Runnable() {
-            @Override
-            public void run() {
-
-                while (true){
-                    AnnotationRequest request = null;
-                    try{
-                        LOG.info("Waiting for annotation requests ...");
-                        request = queueService.getAnnotationRequest();
-
-                        annotate(request);
-
-                    }catch (Exception e){
-                        LOG.error("Error creating topics",e);
-                        if (request != null) mailService.notifyAnnotationError(request, "Annotation error. For details consult with your system administrator.  ");
-                    }
-
-                }
-
-            }
-        });
-    }
-
-
-    public void annotate(AnnotationRequest annotationRequest){
+    public void create(AnnotationRequest annotationRequest){
 
         try{
 

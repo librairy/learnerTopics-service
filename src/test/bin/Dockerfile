@@ -1,7 +1,7 @@
 FROM librairy/modeler-topics-service:latest
 ADD model/model* /bin/
-ENV SWAGGER_TITLE="agnews-model"
-ENV SWAGGER_DESCRIPTION="Created from 1 million news articles gathered from more than 2000 news sources by ComeToMyHead in 1 year of activity"
+ENV SWAGGER_TITLE="test-model"
+ENV SWAGGER_DESCRIPTION="test topic model"
 ENV SWAGGER_CONTACT_NAME="librAIry"
 ENV SWAGGER_CONTACT_EMAIL="cbadenes@fi.upm.es"
 ENV SWAGGER_CONTACT_URL="https://librairy.linkeddata.es"

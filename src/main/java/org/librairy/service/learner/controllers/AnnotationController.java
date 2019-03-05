@@ -6,10 +6,9 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.librairy.service.learner.builders.DateBuilder;
 import org.librairy.service.learner.facade.rest.model.Result;
-import org.librairy.service.learner.facade.rest.model.TopicsRequest;
 import org.librairy.service.learner.model.AnnotationRequest;
+import org.librairy.service.learner.model.Task;
 import org.librairy.service.learner.service.QueueService;
-import org.librairy.service.nlp.facade.rest.model.AnnotationsRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,7 +52,7 @@ public class AnnotationController {
         String date = DateBuilder.now();
         try {
             if (!request.isValid()) return new ResponseEntity(new Result(date, "REJECTED", "Bad Request"),HttpStatus.BAD_REQUEST);
-            queueService.addAnnotationRequest(request);
+            queueService.add(new Task(request));
             return new ResponseEntity(new Result(date,"QUEUED","Task created"), HttpStatus.ACCEPTED);
         } catch (Exception e) {
             LOG.error("IO Error", e);
