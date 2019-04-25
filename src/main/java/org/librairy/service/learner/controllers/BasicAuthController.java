@@ -1,7 +1,6 @@
 package org.librairy.service.learner.controllers;
 
-import org.librairy.service.swagger.SwaggerConfig;
-import org.springframework.beans.factory.annotation.Value;
+import es.upm.oeg.librairy.service.swagger.SwaggerConfig;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import springfox.documentation.builders.PathSelectors;

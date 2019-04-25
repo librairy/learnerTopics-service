@@ -5,7 +5,7 @@ import org.apache.commons.io.FileUtils;
 import org.librairy.service.learner.builders.CorpusBuilder;
 import org.librairy.service.learner.facade.model.DataSource;
 import org.librairy.service.learner.facade.model.TopicsRequest;
-import org.librairy.service.modeler.clients.LibrairyNlpClient;
+import es.upm.oeg.librairy.service.modeler.clients.LibrairyNlpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,23 +66,27 @@ public class WorkspaceService {
     private Path getPath(TopicsRequest request){
 
         // name
-        StringBuilder workspaceName = new StringBuilder();
-        workspaceName.append(request.getName().replaceAll("\\W+","-"));
+        StringBuilder fileNameBuilder = new StringBuilder();
+        fileNameBuilder.append(request.getName().replaceAll("\\W+","-"));
+
+        DataSource datasource = request.getFrom();
+
+        // url
+        fileNameBuilder.append("-").append(datasource.getUrl());
 
         // filter
-        DataSource datasource = request.getFrom();
         if (!Strings.isNullOrEmpty(datasource.getFilter())){
-            workspaceName.append("-").append(datasource.getFilter().hashCode());
+            fileNameBuilder.append("-").append(datasource.getFilter().hashCode());
         }
 
         // size
         String size = datasource.getSize()<0? "full" : String.valueOf(datasource.getSize());
-        workspaceName.append("-").append(size);
+        fileNameBuilder.append("-").append(size);
 
         // extension
-        workspaceName.append(".csv.gz");
+        String fileName = fileNameBuilder.toString().hashCode() + ".csv.gz";
 
-        return Paths.get(outputDir, workspaceName.toString());
+        return Paths.get(outputDir, fileName);
     }
 
 }

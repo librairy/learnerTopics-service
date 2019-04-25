@@ -8,8 +8,8 @@ import org.librairy.service.learner.builders.MailBuilder;
 import org.librairy.service.learner.model.TopicReport;
 import org.librairy.service.learner.service.StoplabelService;
 import org.librairy.service.learner.service.StopwordService;
-import org.librairy.service.modeler.facade.model.TopicWord;
-import org.librairy.service.modeler.service.TopicsService;
+import es.upm.oeg.librairy.service.modeler.facade.model.TopicWord;
+import es.upm.oeg.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +87,7 @@ public class LDALauncher {
                     Map<String,List<String>> topics = new HashMap<>();
 
                     for (Map.Entry<Integer,List<TopicWord>> entry : topWords.entrySet()){
-                        Label name = model.topicAlphabet.lookupLabel(entry.getKey());
+                        Label name = model.topicAlphabet.lookupLabel(String.valueOf(entry.getKey()));
                         List<String> words = entry.getValue().stream().map(tw -> tw.getValue()).collect(Collectors.toList());
                         String nameL = name.toString();
                         topics.put(nameL, words);

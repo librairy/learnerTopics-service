@@ -8,8 +8,6 @@ import org.apache.velocity.runtime.RuntimeConstants;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.librairy.service.learner.facade.model.TopicsRequest;
 import org.librairy.service.learner.model.AnnotationRequest;
-import org.librairy.service.modeler.facade.model.Settings;
-import org.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,12 +18,10 @@ import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Date;
 import java.util.Properties;
-import java.util.concurrent.Executors;
 
 /**
  * @author Badenes Olmedo, Carlos <cbadenes@fi.upm.es>

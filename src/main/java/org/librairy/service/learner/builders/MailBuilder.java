@@ -1,8 +1,8 @@
 package org.librairy.service.learner.builders;
 
 import com.google.common.base.Strings;
-import org.librairy.service.modeler.facade.model.Settings;
-import org.librairy.service.modeler.service.TopicsService;
+import es.upm.oeg.librairy.service.modeler.facade.model.Settings;
+import es.upm.oeg.librairy.service.modeler.service.TopicsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;

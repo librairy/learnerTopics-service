@@ -18,7 +18,7 @@ import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.librairy.service.learner.executors.ParallelExecutor;
-import org.librairy.service.modeler.facade.rest.model.ClassRequest;
+import es.upm.oeg.librairy.service.modeler.facade.rest.model.ClassRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
